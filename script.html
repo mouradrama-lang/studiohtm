@@ -234,7 +234,7 @@
 
     /* SCRIPT AREA */
     .script-area {
-        min-height: 200px;
+        min-height: 180px;
         font-family: inherit;
         font-size: 0.9rem;
         line-height: 1.6;
@@ -270,6 +270,96 @@
     }
     .tool-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
+    /* ═══ SLIDER NOMBRE DE CLIPS ═══ */
+    .clip-count-control {
+        background: var(--panel-2);
+        border: 1px solid var(--border-2);
+        border-radius: 12px;
+        padding: 0.9rem;
+        margin-bottom: 0.8rem;
+    }
+    .clip-count-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.7rem;
+    }
+    .clip-count-label {
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--ink);
+        font-weight: 800;
+    }
+    .clip-count-value {
+        font-size: 1.5rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, var(--cyan) 0%, var(--magenta) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        min-width: 3rem;
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+        line-height: 1;
+    }
+    .clip-count-value small {
+        font-size: 0.7rem;
+        color: var(--ink-dim);
+        -webkit-text-fill-color: var(--ink-dim);
+        font-weight: 600;
+        margin-left: 0.2rem;
+    }
+    .slider-wrap {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.4rem;
+    }
+    input[type="range"] {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100%;
+        height: 8px;
+        border-radius: 4px;
+        background: var(--border);
+        outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--cyan) 0%, var(--magenta) 100%);
+        cursor: pointer;
+        box-shadow: 0 3px 12px rgba(0,217,255,0.55);
+        border: 3px solid var(--bg);
+    }
+    input[type="range"]::-moz-range-thumb {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--cyan) 0%, var(--magenta) 100%);
+        cursor: pointer;
+        border: 3px solid var(--bg);
+    }
+    .slider-ticks {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.6rem;
+        color: var(--ink-faint);
+        padding: 0 0.1rem;
+        font-weight: 600;
+    }
+    .clip-count-hint {
+        font-size: 0.68rem;
+        color: var(--ink-dim);
+        margin-top: 0.55rem;
+        text-align: center;
+        font-style: italic;
+        line-height: 1.4;
+    }
+
     /* SCENES LIST */
     .scenes-list {
         display: flex;
@@ -290,6 +380,7 @@
         justify-content: space-between;
         align-items: center;
         margin-bottom: 0.5rem;
+        padding-right: 1.4rem;
     }
     .scene-num {
         font-size: 0.65rem;
@@ -323,7 +414,7 @@
     .scene-text:focus { outline: none; border-color: var(--cyan); }
     .scene-x {
         position: absolute;
-        top: 6px; right: 6px;
+        top: 8px; right: 8px;
         background: rgba(192,57,43,0.85);
         color: #fff;
         border: none;
@@ -358,42 +449,6 @@
         color: var(--ink-faint);
         font-size: 0.82rem;
         font-style: italic;
-    }
-
-    /* SLIDER */
-    .slider-field {
-        display: grid;
-        grid-template-columns: 1fr auto;
-        gap: 0.8rem;
-        align-items: center;
-    }
-    .slider-value {
-        font-size: 1.6rem;
-        font-weight: 800;
-        color: var(--cyan-2);
-        min-width: 2.5rem;
-        text-align: right;
-        font-variant-numeric: tabular-nums;
-    }
-    input[type="range"] {
-        -webkit-appearance: none;
-        appearance: none;
-        width: 100%;
-        height: 6px;
-        border-radius: 3px;
-        background: var(--border);
-        outline: none;
-    }
-    input[type="range"]::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        appearance: none;
-        width: 22px;
-        height: 22px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, var(--cyan) 0%, var(--magenta) 100%);
-        cursor: pointer;
-        box-shadow: 0 2px 10px rgba(0,217,255,0.5);
-        border: 2px solid var(--bg);
     }
 
     .checkbox-field {
@@ -617,12 +672,12 @@
     </div>
 </div>
 
-<!-- ═══ ÉTAPE 1 : SCÉNARIO ═══ -->
+<!-- ═══ ÉTAPE 1 : SCÉNARIO + NOMBRE DE CLIPS ═══ -->
 <div class="panel open" id="panel-script">
     <div class="panel-header" data-toggle="panel-script">
         <div class="panel-title">
             <div class="panel-icon">✍️</div>
-            1. Votre scénario
+            1. Scénario & clips
         </div>
         <div class="panel-chevron">▼</div>
     </div>
@@ -638,6 +693,27 @@
             </div>
         </div>
 
+        <!-- ═══ CONTRÔLE DU NOMBRE DE CLIPS ═══ -->
+        <div class="clip-count-control">
+            <div class="clip-count-header">
+                <div class="clip-count-label">🎯 Nombre de clips à générer</div>
+                <div class="clip-count-value" id="clip-count-display">5<small>clips</small></div>
+            </div>
+            <div class="slider-wrap">
+                <input type="range" id="clip-count-slider" min="1" max="20" value="5">
+                <div class="slider-ticks">
+                    <span>1</span>
+                    <span>5</span>
+                    <span>10</span>
+                    <span>15</span>
+                    <span>20</span>
+                </div>
+            </div>
+            <div class="clip-count-hint" id="clip-count-hint">
+                Votre scénario sera découpé en 5 scènes maximum
+            </div>
+        </div>
+
         <div class="field">
             <label class="field-label">Écrivez votre scénario</label>
             <textarea class="script-area" id="script-input" placeholder="Écrivez votre histoire. Chaque paragraphe deviendra une scène.
@@ -645,13 +721,13 @@
 Exemple :
 Un voyageur solitaire marche dans un désert brûlant. Le soleil est écrasant, la soif le ronge.
 
-Il aperçoit au loin une silhouette vacillante. Est-ce un mirage ? Il presse le pas, son cœur bat plus fort.
+Il aperçoit au loin une silhouette vacillante. Est-ce un mirage ? Il presse le pas.
 
-C'est une jeune femme, épuisée comme lui. Leurs regards se croisent. Un instant de reconnaissance silencieuse.
+C'est une jeune femme, épuisée comme lui. Leurs regards se croisent.
 
-Ils décident de continuer ensemble. Au sommet de la dernière dune, une oasis immense apparaît.
+Ils décident de continuer ensemble. Au sommet de la dernière dune, une oasis apparaît.
 
-L'eau coule entre leurs doigts. Ils rient, enfin libres. Le désert n'a pas eu raison d'eux."></textarea>
+L'eau coule entre leurs doigts. Ils rient, enfin libres."></textarea>
             <div class="field-hint">✏️ Séparez vos scènes par des lignes vides (Entrée ×2)</div>
         </div>
 
@@ -669,7 +745,7 @@ L'eau coule entre leurs doigts. Ils rient, enfin libres. Le désert n'a pas eu r
             <div class="panel-icon">🎞️</div>
             2. Découpage
         </div>
-        <div class="panel-badge" id="scenes-badge">0 / 20</div>
+        <div class="panel-badge" id="scenes-badge">0 / 5</div>
     </div>
     <div class="panel-body">
         <div class="scenes-list" id="scenes-list">
@@ -755,14 +831,14 @@ const MAX_SCENES = 20;
 const CREATE_INTERVAL_MS = 62000;
 const POLL_INTERVAL = 8;
 const MAX_POLL = 100;
-const API_KEY_STORE = 'agnes_api_key'; // même clé que les autres applis
+const API_KEY_STORE = 'agnes_api_key';
 
 // ══════════════════════════════════════════════════════════════════
-// STYLES VISUELS
+// STYLES
 // ══════════════════════════════════════════════════════════════════
 const STYLES = {
-    cinema:      'cinematic film look, dramatic lighting, subtle film grain, shallow depth of field, professional color grading, movie atmosphere',
-    realiste:    'realistic natural lighting, muted color palette, documentary realism, authentic texture, natural look',
+    cinema:      'cinematic film look, dramatic lighting, subtle film grain, shallow depth of field, professional color grading',
+    realiste:    'realistic natural lighting, muted color palette, documentary realism, authentic texture',
     surrealisme: 'surrealist aesthetic, impossible juxtapositions, dreamlike distortions, Salvador Dali influence',
     noir:        'classic film noir, high contrast black and white, deep shadows, chiaroscuro, 1940s atmosphere',
     golden:      'golden hour warm sunlight, soft amber glow, long shadows, luminous warm atmosphere',
@@ -771,8 +847,8 @@ const STYLES = {
     cyberpunk:   'cyberpunk futuristic aesthetic, neon pink and cyan lighting, holographic accents',
     pastel:      'soft pastel color palette, dreamy diffused light, gentle dreamlike atmosphere',
     brume:       'atmospheric mist, soft haze, diffused glowing light, mystical ethereal atmosphere',
-    anime:       'Studio Ghibli anime style, hand-painted watercolor backgrounds, cel-shaded characters, Miyazaki aesthetic',
-    '3d':        'high-quality 3D computer animation, Pixar-style rendering, cinematic lighting, subsurface scattering'
+    anime:       'Studio Ghibli anime style, hand-painted watercolor backgrounds, cel-shaded characters',
+    '3d':        'high-quality 3D computer animation, Pixar-style rendering, cinematic lighting'
 };
 
 // ══════════════════════════════════════════════════════════════════
@@ -780,22 +856,23 @@ const STYLES = {
 // ══════════════════════════════════════════════════════════════════
 const ROLES = [
     { id: 'intro', short: 'INTRO', name: 'Introduction',
-      prompt: 'Establishing shot. Wide framing revealing the world and context. Slow atmospheric camera movement. Introduce the setting, mood and tone.' },
+      prompt: 'Establishing shot. Wide framing revealing the world and context. Slow atmospheric camera movement.' },
     { id: 'dev', short: 'DEV', name: 'Développement',
-      prompt: 'Development shot. Medium framing introducing the subject or action. Gentle camera movement. Build curiosity.' },
+      prompt: 'Development shot. Medium framing introducing subject or action. Gentle camera movement. Build curiosity.' },
     { id: 'tension', short: 'TENS', name: 'Tension',
-      prompt: 'Rising tension shot. Closer framing, more dynamic movement. Atmosphere intensifies, shadows deepen.' },
+      prompt: 'Rising tension shot. Closer framing, more dynamic movement. Atmosphere intensifies.' },
     { id: 'climax', short: 'CLIMAX', name: 'Climax',
-      prompt: 'Climax shot. Emotional and dramatic peak. Dramatic lighting, powerful movement, intense emotion.' },
+      prompt: 'Climax shot. Emotional and dramatic peak. Dramatic lighting, powerful movement.' },
     { id: 'resolution', short: 'FIN', name: 'Résolution',
-      prompt: 'Resolution shot. Calm, wide, reflective framing. Slow pull-back, release of tension, quiet closure.' }
+      prompt: 'Resolution shot. Calm, wide, reflective framing. Slow pull-back, quiet closure.' }
 ];
 
 // ══════════════════════════════════════════════════════════════════
 // ÉTAT
 // ══════════════════════════════════════════════════════════════════
 const state = {
-    scenes: [],         // { id, text, roleId }
+    scenes: [],
+    targetClipCount: 5,     // ← nombre choisi par l'utilisateur
     durationFrames: 241,
     generateAudio: true,
     style: 'cinema',
@@ -931,7 +1008,7 @@ function refreshApi() {
 }
 
 // ══════════════════════════════════════════════════════════════════
-// DÉCOUPAGE DU SCÉNARIO EN SCÈNES
+// ⭐ DÉCOUPAGE INTELLIGENT SELON LE NOMBRE CHOISI
 // ══════════════════════════════════════════════════════════════════
 function splitScript() {
     const raw = $('script-input').value.trim();
@@ -940,25 +1017,27 @@ function splitScript() {
         return;
     }
 
-    // Séparer par lignes vides (paragraphes)
+    const target = state.targetClipCount;
+
+    // Séparer par paragraphes (lignes vides)
     let blocks = raw.split(/\n\s*\n/).map(s => s.trim()).filter(s => s.length > 0);
 
-    // Si un seul gros bloc, découper par phrases
-    if (blocks.length === 1) {
-        const sentences = raw.match(/[^.!?]+[.!?]+/g) || [raw];
-        blocks = sentences.map(s => s.trim()).filter(s => s.length > 10);
+    // Si pas assez de blocs, on découpe par phrases
+    if (blocks.length < target) {
+        const sentences = (raw.match(/[^.!?]+[.!?]+/g) || [raw]).map(s => s.trim()).filter(s => s.length > 3);
+        // Fusionner les phrases pour atteindre le nombre cible
+        blocks = groupItems(sentences, target);
     }
 
-    // Si encore trop peu, forcer la découpe par phrases
-    if (blocks.length < 2) {
-        const sentences = raw.match(/[^.!?]+[.!?]+/g) || [raw];
-        blocks = sentences.map(s => s.trim()).filter(s => s.length > 5);
+    // Si trop de blocs, on regroupe
+    if (blocks.length > target) {
+        blocks = groupItems(blocks, target);
     }
 
-    // Limiter à 20
-    if (blocks.length > MAX_SCENES) {
-        toast('Trop de scènes, limité à ' + MAX_SCENES, 'warn');
-        blocks = blocks.slice(0, MAX_SCENES);
+    // Cas particulier : un seul gros bloc
+    if (blocks.length === 1 && target > 1) {
+        const sentences = (raw.match(/[^.!?]+[.!?]+/g) || [raw]).map(s => s.trim()).filter(s => s.length > 3);
+        blocks = groupItems(sentences, target);
     }
 
     state.scenes = blocks.map(text => ({
@@ -971,6 +1050,39 @@ function splitScript() {
     renderScenes();
     updateGo();
     toast(state.scenes.length + ' scène' + (state.scenes.length > 1 ? 's' : '') + ' créée' + (state.scenes.length > 1 ? 's' : ''), 'success');
+}
+
+/**
+ * Regroupe une liste d'items en N groupes à peu près égaux
+ */
+function groupItems(items, n) {
+    if (items.length === 0) return [];
+    if (n >= items.length) return items.slice(); // déjà assez
+
+    const result = [];
+    const perGroup = items.length / n;
+
+    for (let i = 0; i < n; i++) {
+        const start = Math.floor(i * perGroup);
+        const end = Math.floor((i + 1) * perGroup);
+        const group = items.slice(start, end).join(' ').trim();
+        if (group) result.push(group);
+    }
+
+    // Si des items restants n'ont pas été inclus (arrondi), les ajouter au dernier
+    const coveredEnd = Math.floor(n * perGroup);
+    if (coveredEnd < items.length) {
+        const remaining = items.slice(coveredEnd).join(' ').trim();
+        if (remaining) {
+            if (result.length > 0) {
+                result[result.length - 1] = (result[result.length - 1] + ' ' + remaining).trim();
+            } else {
+                result.push(remaining);
+            }
+        }
+    }
+
+    return result;
 }
 
 function assignRoles() {
@@ -1007,7 +1119,7 @@ function updateSceneText(id, text) {
 function renderScenes() {
     const list = $('scenes-list');
     const badge = $('scenes-badge');
-    if (badge) badge.textContent = state.scenes.length + ' / ' + MAX_SCENES;
+    if (badge) badge.textContent = state.scenes.length + ' / ' + state.targetClipCount;
 
     if (!state.scenes.length) {
         list.innerHTML = '<div class="empty-state">Écrivez votre scénario ci-dessus puis appuyez sur <strong>✂️ Découper en scènes</strong>.</div>';
@@ -1058,7 +1170,20 @@ function updateGo() {
 }
 
 // ══════════════════════════════════════════════════════════════════
-// PROMPT POUR TEXT-TO-VIDEO
+// SLIDER NOMBRE DE CLIPS
+// ══════════════════════════════════════════════════════════════════
+function updateClipCountUI() {
+    const v = state.targetClipCount;
+    $('clip-count-display').innerHTML = v + '<small>clip' + (v > 1 ? 's' : '') + '</small>';
+    const dur = state.durationFrames === 241 ? '10s' : '5s';
+    $('clip-count-hint').textContent = 'Votre scénario sera découpé en ' + v + ' scène' + (v > 1 ? 's' : '') + ' maximum (' + (v * (state.durationFrames === 241 ? 10 : 5)) + 's de film)';
+    // Mettre à jour le badge de la section scènes
+    const badge = $('scenes-badge');
+    if (badge) badge.textContent = state.scenes.length + ' / ' + v;
+}
+
+// ══════════════════════════════════════════════════════════════════
+// PROMPT
 // ══════════════════════════════════════════════════════════════════
 function buildPrompt(scene, index) {
     const role = getRole(scene.roleId);
@@ -1075,7 +1200,6 @@ function buildPrompt(scene, index) {
     parts.push('NARRATIVE ROLE — ' + role.name + ': ' + role.prompt);
     if (title) parts.push('Film title: "' + title + '"');
     if (genre) parts.push('Genre: ' + genre);
-    // Contexte global (début du script uniquement pour garder de la place)
     if (fullScript.length > scene.text.length + 20) {
         parts.push('Full story context: ' + fullScript.slice(0, 250) + '…');
     }
@@ -1122,14 +1246,12 @@ async function apiFetch(url, opts = {}) {
 }
 
 async function createTask(scene, index) {
-    // TEXT-TO-VIDEO : on n'envoie PAS d'image
     const body = {
         model: MODEL,
         prompt: buildPrompt(scene, index),
         num_frames: state.durationFrames,
         frame_rate: FPS
     };
-
     const r = await apiFetch(API_BASE + '/videos', {
         method: 'POST',
         headers: {
@@ -1138,7 +1260,6 @@ async function createTask(scene, index) {
         },
         body: JSON.stringify(body)
     });
-
     if (!r.ok) {
         const err = await r.text();
         throw new Error('HTTP ' + r.status + ' — ' + err.slice(0, 200));
@@ -1354,6 +1475,12 @@ L'eau coule entre leurs doigts. Ils rient, enfin libres. Le désert n'a pas eu r
         h.addEventListener('click', () => $(h.dataset.toggle).classList.toggle('open'));
     });
 
+    // ═══ SLIDER NOMBRE DE CLIPS ═══
+    $('clip-count-slider').addEventListener('input', e => {
+        state.targetClipCount = parseInt(e.target.value, 10);
+        updateClipCountUI();
+    });
+
     $('demo-btn').addEventListener('click', () => {
         $('script-input').value = DEMO_SCRIPT;
         $('film-title').value = 'Le Désert';
@@ -1365,6 +1492,7 @@ L'eau coule entre leurs doigts. Ils rient, enfin libres. Le désert n'a pas eu r
 
     $('duration-select').addEventListener('change', e => {
         state.durationFrames = parseInt(e.target.value, 10);
+        updateClipCountUI();
         renderScenes();
         updateGo();
     });
@@ -1375,6 +1503,7 @@ L'eau coule entre leurs doigts. Ils rient, enfin libres. Le désert n'a pas eu r
     $('stop-btn').addEventListener('click', stopAll);
 
     refreshApi();
+    updateClipCountUI();
     renderScenes();
     renderQueue();
     updateGo();
