@@ -1,0 +1,1385 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>TexteVersVidéo Studio — Du scénario au film</title>
+<style>
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    :root {
+        --bg: #0a0a0f;
+        --panel: #16161f;
+        --panel-2: #1c1c28;
+        --border: #2a2a38;
+        --border-2: #35354a;
+        --ink: #f5f5f7;
+        --ink-dim: #8888a0;
+        --ink-faint: #555565;
+        --cyan: #00d9ff;
+        --cyan-2: #5eeeff;
+        --magenta: #ff5eb4;
+        --success: #2d8a4e;
+        --error: #c0392b;
+        --warn: #d4a017;
+    }
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+        background: var(--bg);
+        color: var(--ink);
+        min-height: 100vh;
+        padding: 1.2rem 1rem 6rem;
+        font-size: 15px;
+        line-height: 1.5;
+        max-width: 640px;
+        margin: 0 auto;
+        background-image:
+            radial-gradient(circle at 20% 5%, rgba(0,217,255,0.09) 0%, transparent 45%),
+            radial-gradient(circle at 80% 95%, rgba(255,94,180,0.07) 0%, transparent 45%);
+        background-attachment: fixed;
+    }
+
+    header { text-align: center; margin-bottom: 1.5rem; }
+    h1 {
+        font-size: 1.9rem;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+        background: linear-gradient(135deg, #ffffff 0%, var(--cyan) 50%, var(--magenta) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.35rem;
+    }
+    .subtitle {
+        font-size: 0.78rem;
+        color: var(--ink-dim);
+        letter-spacing: 0.03em;
+    }
+    .subtitle em { color: var(--cyan-2); font-style: italic; }
+
+    .panel {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 1.1rem;
+        margin-bottom: 0.9rem;
+    }
+    .panel.complete { border-color: var(--success); }
+    .panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        user-select: none;
+        margin-bottom: 0.9rem;
+    }
+    .panel-header.no-toggle { cursor: default; }
+    .panel-title {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--ink);
+    }
+    .panel-icon {
+        width: 30px; height: 30px;
+        display: flex; align-items: center; justify-content: center;
+        background: linear-gradient(135deg, var(--cyan) 0%, var(--magenta) 100%);
+        border-radius: 8px;
+        font-size: 1rem;
+        box-shadow: 0 4px 12px rgba(0,217,255,0.25);
+    }
+    .panel-badge {
+        font-size: 0.62rem;
+        background: var(--cyan);
+        color: #0a0a0f;
+        padding: 0.15rem 0.5rem;
+        border-radius: 10px;
+        font-weight: 800;
+        letter-spacing: 0.05em;
+    }
+    .panel-chevron {
+        font-size: 0.7rem;
+        color: var(--ink-faint);
+        transition: transform 0.2s;
+    }
+    .panel.open .panel-chevron { transform: rotate(180deg); }
+    .panel-body {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.4s ease;
+    }
+    .panel.open .panel-body { max-height: 20000px; }
+
+    .field { margin-bottom: 0.8rem; }
+    .field:last-child { margin-bottom: 0; }
+    .field-label {
+        display: block;
+        font-size: 0.68rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--ink-dim);
+        font-weight: 700;
+        margin-bottom: 0.45rem;
+    }
+    .field-hint {
+        font-size: 0.7rem;
+        color: var(--ink-faint);
+        margin-top: 0.35rem;
+        line-height: 1.4;
+        font-style: italic;
+    }
+
+    input[type="text"], input[type="password"], textarea, select {
+        width: 100%;
+        padding: 0.8rem 1rem;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: var(--panel-2);
+        color: var(--ink);
+        font-family: inherit;
+        font-size: 0.88rem;
+        transition: border-color 0.15s;
+    }
+    input[type="text"]:focus, input[type="password"]:focus, textarea:focus, select:focus {
+        outline: none;
+        border-color: var(--cyan);
+        box-shadow: 0 0 0 3px rgba(0,217,255,0.12);
+    }
+    textarea { min-height: 100px; resize: vertical; line-height: 1.5; }
+    select {
+        -webkit-appearance: none;
+        appearance: none;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path fill='%2300d9ff' d='M6 8L0 0h12z'/></svg>");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 11px;
+        padding-right: 2.5rem;
+    }
+    input[type="password"] {
+        font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+        font-size: 0.8rem;
+    }
+
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+
+    /* API */
+    .api-input-wrap {
+        position: relative;
+        margin-bottom: 0.6rem;
+    }
+    .api-input-wrap input { padding-right: 3rem; }
+    .api-eye {
+        position: absolute;
+        right: 0.7rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: transparent;
+        border: none;
+        color: var(--ink-dim);
+        font-size: 1.1rem;
+        cursor: pointer;
+        padding: 0.3rem;
+        line-height: 1;
+    }
+    .api-btn {
+        width: 100%;
+        padding: 0.8rem 1rem;
+        border-radius: 10px;
+        border: none;
+        background: linear-gradient(135deg, var(--cyan) 0%, var(--cyan-2) 100%);
+        color: #0a0a0f;
+        font-size: 0.85rem;
+        font-weight: 800;
+        font-family: inherit;
+        cursor: pointer;
+        letter-spacing: 0.03em;
+    }
+    .api-btn:active { transform: scale(0.97); }
+
+    .api-result {
+        margin-top: 0.75rem;
+        padding: 0.75rem 0.9rem;
+        border-radius: 10px;
+        font-size: 0.78rem;
+        line-height: 1.45;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.6rem;
+        background: var(--panel-2);
+        border: 1px solid var(--border);
+    }
+    .api-result .ar-icon { font-size: 1rem; flex-shrink: 0; line-height: 1.2; }
+    .api-result .ar-content { flex: 1; min-width: 0; }
+    .api-result .ar-title { font-weight: 700; margin-bottom: 0.15rem; }
+    .api-result .ar-detail { font-size: 0.7rem; opacity: 0.85; }
+    .api-result.idle { color: var(--ink-dim); }
+    .api-result.ok {
+        color: #4ec97a;
+        border-color: rgba(78,201,122,0.4);
+        background: rgba(45,138,78,0.1);
+    }
+    .api-result.err {
+        color: #ff6b5a;
+        border-color: rgba(255,107,90,0.4);
+        background: rgba(192,57,43,0.1);
+    }
+    .api-result.warn {
+        color: #ffc84a;
+        border-color: rgba(255,200,74,0.4);
+        background: rgba(212,160,23,0.1);
+    }
+
+    /* SCRIPT AREA */
+    .script-area {
+        min-height: 200px;
+        font-family: inherit;
+        font-size: 0.9rem;
+        line-height: 1.6;
+    }
+    .script-tools {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+        margin-top: 0.6rem;
+    }
+    .tool-btn {
+        padding: 0.7rem;
+        border-radius: 10px;
+        border: 1px solid var(--border-2);
+        background: var(--panel-2);
+        color: var(--ink);
+        font-size: 0.75rem;
+        font-weight: 700;
+        font-family: inherit;
+        cursor: pointer;
+        letter-spacing: 0.03em;
+        transition: all 0.15s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.3rem;
+    }
+    .tool-btn:active { transform: scale(0.97); }
+    .tool-btn.primary {
+        background: linear-gradient(135deg, var(--cyan) 0%, var(--magenta) 100%);
+        color: #0a0a0f;
+        border-color: transparent;
+    }
+    .tool-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* SCENES LIST */
+    .scenes-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+        margin-top: 0.9rem;
+    }
+    .scene-card {
+        background: var(--panel-2);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 0.75rem;
+        position: relative;
+        border-left: 3px solid var(--cyan);
+    }
+    .scene-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+    .scene-num {
+        font-size: 0.65rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--cyan);
+    }
+    .scene-role {
+        font-size: 0.6rem;
+        background: rgba(0,217,255,0.15);
+        color: var(--cyan-2);
+        padding: 0.15rem 0.5rem;
+        border-radius: 10px;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+    }
+    .scene-text {
+        width: 100%;
+        padding: 0.6rem 0.7rem;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--panel);
+        color: var(--ink);
+        font-family: inherit;
+        font-size: 0.8rem;
+        resize: vertical;
+        min-height: 60px;
+        line-height: 1.45;
+    }
+    .scene-text:focus { outline: none; border-color: var(--cyan); }
+    .scene-x {
+        position: absolute;
+        top: 6px; right: 6px;
+        background: rgba(192,57,43,0.85);
+        color: #fff;
+        border: none;
+        width: 22px; height: 22px;
+        border-radius: 50%;
+        font-size: 10px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .scene-meta {
+        display: flex;
+        gap: 0.4rem;
+        margin-top: 0.5rem;
+        flex-wrap: wrap;
+    }
+    .scene-chip {
+        font-size: 0.62rem;
+        padding: 0.2rem 0.5rem;
+        border-radius: 8px;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        color: var(--ink-dim);
+        font-weight: 600;
+        letter-spacing: 0.03em;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 1.5rem 1rem;
+        color: var(--ink-faint);
+        font-size: 0.82rem;
+        font-style: italic;
+    }
+
+    /* SLIDER */
+    .slider-field {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 0.8rem;
+        align-items: center;
+    }
+    .slider-value {
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: var(--cyan-2);
+        min-width: 2.5rem;
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+    }
+    input[type="range"] {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100%;
+        height: 6px;
+        border-radius: 3px;
+        background: var(--border);
+        outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--cyan) 0%, var(--magenta) 100%);
+        cursor: pointer;
+        box-shadow: 0 2px 10px rgba(0,217,255,0.5);
+        border: 2px solid var(--bg);
+    }
+
+    .checkbox-field {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.7rem 0.8rem;
+        border-radius: 10px;
+        background: var(--panel-2);
+        border: 1px solid var(--border);
+        cursor: pointer;
+    }
+    .checkbox-field input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        accent-color: var(--cyan);
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+    .checkbox-label {
+        font-size: 0.82rem;
+        color: var(--ink);
+        font-weight: 500;
+        user-select: none;
+    }
+
+    .btn-go {
+        width: 100%;
+        padding: 1.15rem;
+        border-radius: 14px;
+        border: none;
+        background: linear-gradient(135deg, var(--cyan) 0%, var(--magenta) 100%);
+        color: #0a0a0f;
+        font-size: 1.02rem;
+        font-weight: 800;
+        font-family: inherit;
+        cursor: pointer;
+        letter-spacing: 0.04em;
+        margin-top: 0.8rem;
+        box-shadow: 0 8px 30px rgba(0,217,255,0.35);
+    }
+    .btn-go:active:not(:disabled) { transform: scale(0.98); }
+    .btn-go:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+        box-shadow: none;
+        filter: grayscale(0.7);
+    }
+    .btn-stop {
+        width: 100%;
+        padding: 0.75rem;
+        border-radius: 12px;
+        border: 1px solid var(--error);
+        background: transparent;
+        color: var(--error);
+        font-size: 0.82rem;
+        font-weight: 700;
+        font-family: inherit;
+        cursor: pointer;
+        margin-top: 0.5rem;
+        display: none;
+    }
+    .btn-stop.visible { display: block; }
+
+    .queue { margin-top: 1rem; }
+    .q-item {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        padding: 0.7rem 0.85rem;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        margin-bottom: 0.4rem;
+        background: var(--panel);
+        font-size: 0.82rem;
+    }
+    .q-item.pending { opacity: 0.5; }
+    .q-item.processing { border-color: var(--cyan); }
+    .q-item.done { border-color: var(--success); }
+    .q-item.failed { border-color: var(--error); }
+    .q-icon { font-size: 0.95rem; width: 1.3rem; text-align: center; flex-shrink: 0; }
+    .q-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .q-status { font-size: 0.7rem; color: var(--ink-dim); text-align: right; flex-shrink: 0; max-width: 55%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .gallery { margin-top: 1.8rem; display: none; }
+    .gallery.visible { display: block; }
+    .gallery-title {
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--cyan-2);
+        font-weight: 800;
+        margin-bottom: 0.8rem;
+    }
+    .gallery-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 0.7rem;
+    }
+    .g-item {
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+        background: #000;
+        animation: fadeIn 0.4s ease;
+        position: relative;
+    }
+    .g-item video { width: 100%; display: block; aspect-ratio: 9/16; object-fit: cover; }
+    .g-item .g-num {
+        position: absolute;
+        top: 6px; left: 6px;
+        background: rgba(10,10,15,0.9);
+        color: var(--cyan-2);
+        font-size: 0.6rem;
+        font-weight: 800;
+        padding: 0.15rem 0.4rem;
+        border-radius: 4px;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .status {
+        position: fixed;
+        bottom: 0; left: 0; right: 0;
+        background: var(--panel);
+        border-top: 1px solid var(--border);
+        color: var(--ink);
+        padding: 0.8rem 1.1rem;
+        font-size: 0.78rem;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        transform: translateY(100%);
+        transition: transform 0.3s;
+        z-index: 100;
+    }
+    .status.visible { transform: translateY(0); }
+    .status .spin {
+        width: 13px; height: 13px;
+        border: 2px solid rgba(0,217,255,0.25);
+        border-top-color: var(--cyan-2);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .toast {
+        position: fixed;
+        top: 1.2rem; left: 50%;
+        transform: translateX(-50%) translateY(-80px);
+        background: var(--cyan);
+        color: #0a0a0f;
+        padding: 0.8rem 1.4rem;
+        border-radius: 12px;
+        font-size: 0.82rem;
+        font-weight: 700;
+        opacity: 0;
+        transition: all 0.35s;
+        z-index: 1000;
+        max-width: 85vw;
+        text-align: center;
+        box-shadow: 0 6px 30px rgba(0,217,255,0.45);
+    }
+    .toast.visible { transform: translateX(-50%) translateY(0); opacity: 1; }
+    .toast.success { background: var(--success); color: #fff; }
+    .toast.error { background: var(--error); color: #fff; }
+
+    #noSleepCanvas, #noSleepVideo {
+        position: fixed;
+        top: 0; left: 0;
+        width: 1px; height: 1px;
+        opacity: 0.01;
+        pointer-events: none;
+        z-index: -1;
+    }
+
+    @media (max-width: 420px) {
+        h1 { font-size: 1.6rem; }
+        .row-2 { grid-template-columns: 1fr; }
+    }
+</style>
+</head>
+<body>
+
+<header>
+    <h1>TexteVersVidéo Studio</h1>
+    <p class="subtitle">Du scénario écrit au film généré — <em>Propulsé par l'API Agnes AI</em></p>
+</header>
+
+<!-- ═══ API ═══ -->
+<div class="panel open" id="panel-api">
+    <div class="panel-header no-toggle">
+        <div class="panel-title">
+            <div class="panel-icon">🔑</div>
+            Paramètres API
+        </div>
+        <div class="panel-badge" id="api-badge">Non configuré</div>
+    </div>
+    <div class="panel-body" style="max-height:none;">
+        <div class="field">
+            <label class="field-label">Clé API Agnes AI</label>
+            <div class="api-input-wrap">
+                <input type="password" id="api-input" placeholder="sk-..." autocomplete="off" spellcheck="false" autocapitalize="off" autocorrect="off">
+                <button type="button" class="api-eye" id="api-eye">👁️</button>
+            </div>
+            <button type="button" class="api-btn" id="api-save">💾 Enregistrer la clé</button>
+            <div class="field-hint">
+                Clé gratuite sur <strong style="color:var(--cyan-2)">platform.agnes-ai.com</strong> → Settings → API Keys
+            </div>
+        </div>
+        <div class="api-result idle" id="api-result">
+            <span class="ar-icon">ℹ️</span>
+            <div class="ar-content">
+                <div class="ar-title" id="ar-title">Aucune clé enregistrée</div>
+                <div class="ar-detail" id="ar-detail">Collez votre clé puis appuyez sur Enregistrer.</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ ÉTAPE 1 : SCÉNARIO ═══ -->
+<div class="panel open" id="panel-script">
+    <div class="panel-header" data-toggle="panel-script">
+        <div class="panel-title">
+            <div class="panel-icon">✍️</div>
+            1. Votre scénario
+        </div>
+        <div class="panel-chevron">▼</div>
+    </div>
+    <div class="panel-body">
+        <div class="row-2">
+            <div class="field">
+                <label class="field-label">Titre du film</label>
+                <input type="text" id="film-title" placeholder="Sans titre" autocomplete="off">
+            </div>
+            <div class="field">
+                <label class="field-label">Genre</label>
+                <input type="text" id="film-genre" placeholder="Drame, aventure…" autocomplete="off">
+            </div>
+        </div>
+
+        <div class="field">
+            <label class="field-label">Écrivez votre scénario</label>
+            <textarea class="script-area" id="script-input" placeholder="Écrivez votre histoire. Chaque paragraphe deviendra une scène.
+
+Exemple :
+Un voyageur solitaire marche dans un désert brûlant. Le soleil est écrasant, la soif le ronge.
+
+Il aperçoit au loin une silhouette vacillante. Est-ce un mirage ? Il presse le pas, son cœur bat plus fort.
+
+C'est une jeune femme, épuisée comme lui. Leurs regards se croisent. Un instant de reconnaissance silencieuse.
+
+Ils décident de continuer ensemble. Au sommet de la dernière dune, une oasis immense apparaît.
+
+L'eau coule entre leurs doigts. Ils rient, enfin libres. Le désert n'a pas eu raison d'eux."></textarea>
+            <div class="field-hint">✏️ Séparez vos scènes par des lignes vides (Entrée ×2)</div>
+        </div>
+
+        <div class="script-tools">
+            <button class="tool-btn" id="demo-btn">📖 Exemple</button>
+            <button class="tool-btn primary" id="split-btn">✂️ Découper en scènes</button>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ ÉTAPE 2 : DÉCOUPAGE ═══ -->
+<div class="panel open" id="panel-scenes">
+    <div class="panel-header" data-toggle="panel-scenes">
+        <div class="panel-title">
+            <div class="panel-icon">🎞️</div>
+            2. Découpage
+        </div>
+        <div class="panel-badge" id="scenes-badge">0 / 20</div>
+    </div>
+    <div class="panel-body">
+        <div class="scenes-list" id="scenes-list">
+            <div class="empty-state">Écrivez votre scénario ci-dessus puis appuyez sur <strong>✂️ Découper en scènes</strong>.</div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ ÉTAPE 3 : RÉALISATION ═══ -->
+<div class="panel open" id="panel-render">
+    <div class="panel-header" data-toggle="panel-render">
+        <div class="panel-title">
+            <div class="panel-icon">🎬</div>
+            3. Réalisation
+        </div>
+        <div class="panel-chevron">▼</div>
+    </div>
+    <div class="panel-body">
+        <div class="field">
+            <label class="field-label">Style visuel global</label>
+            <select id="style-select">
+                <option value="cinema">🎬 Cinématique — lumière dramatique</option>
+                <option value="realiste">📷 Réaliste — naturel, documentaire</option>
+                <option value="surrealisme">🌀 Surréalisme — onirique</option>
+                <option value="noir">⚫ Film Noir — N&B contrasté</option>
+                <option value="golden">🌅 Golden Hour — doré</option>
+                <option value="moonlight">🌙 Clair de Lune — bleuté</option>
+                <option value="vintage">📽️ Vintage — grain délavé</option>
+                <option value="cyberpunk">🌃 Cyberpunk — néons</option>
+                <option value="pastel">🌸 Pastel — doux</option>
+                <option value="brume">🌫️ Brume — atmosphérique</option>
+                <option value="anime">🌸 Anime — Ghibli</option>
+                <option value="3d">✨ 3D — Pixar</option>
+            </select>
+        </div>
+
+        <div class="field">
+            <label class="field-label">Durée de chaque clip</label>
+            <select id="duration-select">
+                <option value="121">5 secondes</option>
+                <option value="241" selected>10 secondes (recommandé)</option>
+            </select>
+        </div>
+
+        <div class="field">
+            <label class="checkbox-field">
+                <input type="checkbox" id="audio-checkbox" checked>
+                <span class="checkbox-label">🎵 Générer l'audio (bruitages + ambiance)</span>
+            </label>
+        </div>
+    </div>
+</div>
+
+<button class="btn-go" id="go-btn" disabled>🎬 Générer le film</button>
+<button class="btn-stop" id="stop-btn">⏹ Arrêter la production</button>
+
+<div class="queue" id="queue"></div>
+
+<div class="gallery" id="gallery">
+    <div class="gallery-title">✨ Votre film généré</div>
+    <div class="gallery-grid" id="gallery-grid"></div>
+</div>
+
+<div class="status" id="status">
+    <div class="spin"></div>
+    <span id="status-text">…</span>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<canvas id="noSleepCanvas" width="2" height="2"></canvas>
+<video id="noSleepVideo" playsinline muted loop></video>
+
+<script>
+// ══════════════════════════════════════════════════════════════════
+// CONFIGURATION
+// ══════════════════════════════════════════════════════════════════
+const API_BASE = 'https://apihub.agnes-ai.com/v1';
+const POLL_BASE = 'https://apihub.agnes-ai.com/agnesapi';
+const MODEL = 'agnes-video-v2.0';
+const FPS = 24;
+const MAX_SCENES = 20;
+const CREATE_INTERVAL_MS = 62000;
+const POLL_INTERVAL = 8;
+const MAX_POLL = 100;
+const API_KEY_STORE = 'agnes_api_key'; // même clé que les autres applis
+
+// ══════════════════════════════════════════════════════════════════
+// STYLES VISUELS
+// ══════════════════════════════════════════════════════════════════
+const STYLES = {
+    cinema:      'cinematic film look, dramatic lighting, subtle film grain, shallow depth of field, professional color grading, movie atmosphere',
+    realiste:    'realistic natural lighting, muted color palette, documentary realism, authentic texture, natural look',
+    surrealisme: 'surrealist aesthetic, impossible juxtapositions, dreamlike distortions, Salvador Dali influence',
+    noir:        'classic film noir, high contrast black and white, deep shadows, chiaroscuro, 1940s atmosphere',
+    golden:      'golden hour warm sunlight, soft amber glow, long shadows, luminous warm atmosphere',
+    moonlight:   'cool moonlight atmosphere, blue and silver tones, soft lunar glow, peaceful night mood',
+    vintage:     'vintage Super 8 film aesthetic, grainy texture, subtle vignette, warm faded colors',
+    cyberpunk:   'cyberpunk futuristic aesthetic, neon pink and cyan lighting, holographic accents',
+    pastel:      'soft pastel color palette, dreamy diffused light, gentle dreamlike atmosphere',
+    brume:       'atmospheric mist, soft haze, diffused glowing light, mystical ethereal atmosphere',
+    anime:       'Studio Ghibli anime style, hand-painted watercolor backgrounds, cel-shaded characters, Miyazaki aesthetic',
+    '3d':        'high-quality 3D computer animation, Pixar-style rendering, cinematic lighting, subsurface scattering'
+};
+
+// ══════════════════════════════════════════════════════════════════
+// RÔLES NARRATIFS
+// ══════════════════════════════════════════════════════════════════
+const ROLES = [
+    { id: 'intro', short: 'INTRO', name: 'Introduction',
+      prompt: 'Establishing shot. Wide framing revealing the world and context. Slow atmospheric camera movement. Introduce the setting, mood and tone.' },
+    { id: 'dev', short: 'DEV', name: 'Développement',
+      prompt: 'Development shot. Medium framing introducing the subject or action. Gentle camera movement. Build curiosity.' },
+    { id: 'tension', short: 'TENS', name: 'Tension',
+      prompt: 'Rising tension shot. Closer framing, more dynamic movement. Atmosphere intensifies, shadows deepen.' },
+    { id: 'climax', short: 'CLIMAX', name: 'Climax',
+      prompt: 'Climax shot. Emotional and dramatic peak. Dramatic lighting, powerful movement, intense emotion.' },
+    { id: 'resolution', short: 'FIN', name: 'Résolution',
+      prompt: 'Resolution shot. Calm, wide, reflective framing. Slow pull-back, release of tension, quiet closure.' }
+];
+
+// ══════════════════════════════════════════════════════════════════
+// ÉTAT
+// ══════════════════════════════════════════════════════════════════
+const state = {
+    scenes: [],         // { id, text, roleId }
+    durationFrames: 241,
+    generateAudio: true,
+    style: 'cinema',
+    running: false,
+    stop: false,
+    completed: 0,
+    failed: 0
+};
+
+// ══════════════════════════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════════════════════════
+const $ = id => document.getElementById(id);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const uid = () => Date.now() + Math.random();
+const esc = s => String(s || '').replace(/[&<>"']/g, c =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+let toastT;
+function toast(msg, type = 'success') {
+    const t = $('toast');
+    t.textContent = msg;
+    t.className = 'toast';
+    void t.offsetWidth;
+    t.classList.add(type, 'visible');
+    clearTimeout(toastT);
+    toastT = setTimeout(() => t.classList.remove('visible'), 2600);
+}
+
+function setStatus(text) {
+    const s = $('status'), st = $('status-text');
+    if (text) { s.classList.add('visible'); st.textContent = text; }
+    else s.classList.remove('visible');
+}
+
+function getRole(id) {
+    return ROLES.find(r => r.id === id) || ROLES[0];
+}
+
+function setApiResult(type, title, detail) {
+    const el = $('api-result');
+    el.className = 'api-result ' + type;
+    const icons = { idle: 'ℹ️', ok: '✅', err: '❌', warn: '⚠️' };
+    el.querySelector('.ar-icon').textContent = icons[type] || 'ℹ️';
+    $('ar-title').textContent = title;
+    $('ar-detail').textContent = detail || '';
+}
+
+// ══════════════════════════════════════════════════════════════════
+// ANTI-VEILLE
+// ══════════════════════════════════════════════════════════════════
+let canvasStream = null, canvasInterval = null;
+async function wakeLock() {
+    try {
+        if ('wakeLock' in navigator) {
+            await navigator.wakeLock.request('screen');
+            return;
+        }
+    } catch (e) {}
+    try {
+        const c = $('noSleepCanvas'), v = $('noSleepVideo');
+        if (!c || !v || typeof c.captureStream !== 'function') return;
+        const ctx = c.getContext('2d');
+        ctx.fillStyle = '#000'; ctx.fillRect(0, 0, 2, 2);
+        canvasStream = c.captureStream(1);
+        let t = false;
+        canvasInterval = setInterval(() => {
+            t = !t;
+            ctx.fillStyle = t ? '#000' : '#010101';
+            ctx.fillRect(0, 0, 2, 2);
+        }, 1000);
+        v.srcObject = canvasStream;
+        v.muted = true; v.playsInline = true;
+        v.play().catch(() => {});
+    } catch (e) {}
+}
+
+// ══════════════════════════════════════════════════════════════════
+// CLÉ API
+// ══════════════════════════════════════════════════════════════════
+function getKey() {
+    try { return (localStorage.getItem(API_KEY_STORE) || '').trim(); }
+    catch (e) { return ''; }
+}
+function saveKey() {
+    const raw = $('api-input').value;
+    let k = String(raw || '').trim()
+        .replace(/^["']|["']$/g, '')
+        .replace(/^Bearer\s+/i, '')
+        .replace(/\s+/g, '');
+
+    if (!k) {
+        try { localStorage.removeItem(API_KEY_STORE); } catch (e) {}
+        refreshApi();
+        toast('Clé supprimée', 'error');
+        return;
+    }
+    if (k.length < 10) {
+        setApiResult('err', 'Clé trop courte', 'La clé doit faire au moins 10 caractères.');
+        toast('Clé trop courte', 'error');
+        return;
+    }
+    try {
+        localStorage.setItem(API_KEY_STORE, k);
+        $('api-input').value = k;
+        refreshApi();
+        toast('Clé enregistrée ✓');
+    } catch (e) {
+        setApiResult('err', 'Erreur', 'Impossible de sauvegarder.');
+        toast('Erreur', 'error');
+    }
+}
+function refreshApi() {
+    const k = getKey();
+    const badge = $('api-badge');
+    const panel = $('panel-api');
+    if (k) {
+        panel.classList.add('complete');
+        badge.textContent = 'Configuré';
+        badge.style.background = 'var(--success)';
+        $('api-input').value = k;
+        setApiResult('ok', '✅ Clé enregistrée',
+            'Clé active · ' + k.slice(0, 10) + '…' + k.slice(-4));
+    } else {
+        panel.classList.remove('complete');
+        badge.textContent = 'Non configuré';
+        badge.style.background = 'var(--cyan)';
+        $('api-input').value = '';
+        setApiResult('idle', 'Aucune clé enregistrée',
+            'Collez votre clé puis appuyez sur Enregistrer.');
+    }
+    updateGo();
+}
+
+// ══════════════════════════════════════════════════════════════════
+// DÉCOUPAGE DU SCÉNARIO EN SCÈNES
+// ══════════════════════════════════════════════════════════════════
+function splitScript() {
+    const raw = $('script-input').value.trim();
+    if (!raw) {
+        toast('Écrivez d\'abord votre scénario', 'error');
+        return;
+    }
+
+    // Séparer par lignes vides (paragraphes)
+    let blocks = raw.split(/\n\s*\n/).map(s => s.trim()).filter(s => s.length > 0);
+
+    // Si un seul gros bloc, découper par phrases
+    if (blocks.length === 1) {
+        const sentences = raw.match(/[^.!?]+[.!?]+/g) || [raw];
+        blocks = sentences.map(s => s.trim()).filter(s => s.length > 10);
+    }
+
+    // Si encore trop peu, forcer la découpe par phrases
+    if (blocks.length < 2) {
+        const sentences = raw.match(/[^.!?]+[.!?]+/g) || [raw];
+        blocks = sentences.map(s => s.trim()).filter(s => s.length > 5);
+    }
+
+    // Limiter à 20
+    if (blocks.length > MAX_SCENES) {
+        toast('Trop de scènes, limité à ' + MAX_SCENES, 'warn');
+        blocks = blocks.slice(0, MAX_SCENES);
+    }
+
+    state.scenes = blocks.map(text => ({
+        id: uid(),
+        text: text,
+        roleId: null
+    }));
+
+    assignRoles();
+    renderScenes();
+    updateGo();
+    toast(state.scenes.length + ' scène' + (state.scenes.length > 1 ? 's' : '') + ' créée' + (state.scenes.length > 1 ? 's' : ''), 'success');
+}
+
+function assignRoles() {
+    const n = state.scenes.length;
+    if (n === 0) return;
+    if (n === 1) state.scenes[0].roleId = 'climax';
+    else if (n === 2) { state.scenes[0].roleId = 'intro'; state.scenes[1].roleId = 'resolution'; }
+    else if (n === 3) { state.scenes[0].roleId = 'intro'; state.scenes[1].roleId = 'climax'; state.scenes[2].roleId = 'resolution'; }
+    else if (n === 4) { state.scenes[0].roleId = 'intro'; state.scenes[1].roleId = 'dev'; state.scenes[2].roleId = 'climax'; state.scenes[3].roleId = 'resolution'; }
+    else if (n === 5) { for (let i = 0; i < 5; i++) state.scenes[i].roleId = ROLES[i].id; }
+    else {
+        for (let i = 0; i < n; i++) {
+            if (i === 0) state.scenes[i].roleId = 'intro';
+            else if (i === n - 1) state.scenes[i].roleId = 'resolution';
+            else if (i === n - 2) state.scenes[i].roleId = 'climax';
+            else if (i === n - 3) state.scenes[i].roleId = 'tension';
+            else state.scenes[i].roleId = (i % 2 === 0) ? 'dev' : 'tension';
+        }
+    }
+}
+
+function removeScene(id) {
+    state.scenes = state.scenes.filter(s => s.id !== id);
+    assignRoles();
+    renderScenes();
+    updateGo();
+}
+
+function updateSceneText(id, text) {
+    const s = state.scenes.find(x => x.id === id);
+    if (s) s.text = text;
+}
+
+function renderScenes() {
+    const list = $('scenes-list');
+    const badge = $('scenes-badge');
+    if (badge) badge.textContent = state.scenes.length + ' / ' + MAX_SCENES;
+
+    if (!state.scenes.length) {
+        list.innerHTML = '<div class="empty-state">Écrivez votre scénario ci-dessus puis appuyez sur <strong>✂️ Découper en scènes</strong>.</div>';
+        return;
+    }
+
+    list.innerHTML = state.scenes.map((s, i) => {
+        const role = getRole(s.roleId);
+        const num = String(i + 1).padStart(2, '0');
+        const dur = state.durationFrames === 241 ? '10s' : '5s';
+        return '<div class="scene-card">' +
+            '<button class="scene-x" data-remove="' + s.id + '">✕</button>' +
+            '<div class="scene-header">' +
+                '<div class="scene-num">SCÈNE ' + num + '</div>' +
+                '<div class="scene-role">' + role.short + '</div>' +
+            '</div>' +
+            '<textarea class="scene-text" data-id="' + s.id + '" placeholder="Décrivez la scène…">' + esc(s.text) + '</textarea>' +
+            '<div class="scene-meta">' +
+                '<span class="scene-chip">' + role.name + '</span>' +
+                '<span class="scene-chip">⏱ ' + dur + '</span>' +
+            '</div>' +
+        '</div>';
+    }).join('');
+
+    list.querySelectorAll('[data-remove]').forEach(b => {
+        b.addEventListener('click', () => removeScene(parseFloat(b.dataset.remove)));
+    });
+    list.querySelectorAll('.scene-text').forEach(ta => {
+        ta.addEventListener('input', e => updateSceneText(parseFloat(ta.dataset.id), e.target.value));
+    });
+}
+
+function updateGo() {
+    const b = $('go-btn');
+    const ok = getKey() && state.scenes.length > 0 && !state.running;
+    b.disabled = !ok;
+    if (state.running) {
+        b.textContent = '🎬 Production… (' + (state.completed + state.failed) + '/' + state.scenes.length + ')';
+    } else if (!getKey()) {
+        b.textContent = 'Ajoutez votre clé API';
+    } else if (!state.scenes.length) {
+        b.textContent = 'Découpez d\'abord votre scénario';
+    } else {
+        const n = state.scenes.length;
+        const dur = state.durationFrames === 241 ? '10s' : '5s';
+        b.textContent = '🎬 Générer ' + n + ' clip' + (n > 1 ? 's' : '') + ' × ' + dur;
+    }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// PROMPT POUR TEXT-TO-VIDEO
+// ══════════════════════════════════════════════════════════════════
+function buildPrompt(scene, index) {
+    const role = getRole(scene.roleId);
+    const total = state.scenes.length;
+    const style = STYLES[state.style] || STYLES.cinema;
+    const title = $('film-title').value.trim();
+    const genre = $('film-genre').value.trim();
+    const fullScript = $('script-input').value.trim();
+
+    const parts = [];
+    parts.push('Generate a cinematic video clip from this scene description.');
+    parts.push('SHOT ' + (index + 1) + ' of ' + total + '.');
+    parts.push('SCENE: ' + scene.text);
+    parts.push('NARRATIVE ROLE — ' + role.name + ': ' + role.prompt);
+    if (title) parts.push('Film title: "' + title + '"');
+    if (genre) parts.push('Genre: ' + genre);
+    // Contexte global (début du script uniquement pour garder de la place)
+    if (fullScript.length > scene.text.length + 20) {
+        parts.push('Full story context: ' + fullScript.slice(0, 250) + '…');
+    }
+    parts.push('Visual style (consistent across all shots): ' + style);
+    parts.push('Cinematic composition, professional cinematography, 24fps');
+    if (state.generateAudio) {
+        parts.push('Sound design: subtle ambient textures, minimal foley, atmospheric presence');
+    } else {
+        parts.push('No audio, silent film');
+    }
+    parts.push('Portrait orientation 9:16 vertical, no text, no watermarks, no subtitles');
+    return parts.join('. ');
+}
+
+// ══════════════════════════════════════════════════════════════════
+// API
+// ══════════════════════════════════════════════════════════════════
+async function apiFetch(url, opts = {}) {
+    for (let i = 0; i < 7; i++) {
+        if (state.stop) throw new Error('stop');
+        try {
+            const r = await fetch(url, opts);
+            if (r.status === 429) {
+                const w = [15, 30, 45, 60, 90, 120, 180][Math.min(i, 6)];
+                setStatus('L\'IA se prépare… (' + w + 's)');
+                await sleep(w * 1000);
+                continue;
+            }
+            if (r.status === 503) {
+                const w = [5, 10, 15, 20, 30, 45][Math.min(i, 5)];
+                setStatus('Préparation… (' + w + 's)');
+                await sleep(w * 1000);
+                continue;
+            }
+            return r;
+        } catch (e) {
+            if (e.message === 'stop') throw e;
+            const w = [3, 5, 8, 12, 20, 30][Math.min(i, 5)];
+            setStatus('Connexion… (' + w + 's)');
+            await sleep(w * 1000);
+        }
+    }
+    return fetch(url, opts);
+}
+
+async function createTask(scene, index) {
+    // TEXT-TO-VIDEO : on n'envoie PAS d'image
+    const body = {
+        model: MODEL,
+        prompt: buildPrompt(scene, index),
+        num_frames: state.durationFrames,
+        frame_rate: FPS
+    };
+
+    const r = await apiFetch(API_BASE + '/videos', {
+        method: 'POST',
+        headers: {
+            'Authorization': 'Bearer ' + getKey(),
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+    });
+
+    if (!r.ok) {
+        const err = await r.text();
+        throw new Error('HTTP ' + r.status + ' — ' + err.slice(0, 200));
+    }
+    const d = await r.json();
+    const id = d.video_id || d.id || d.task_id;
+    if (!id) throw new Error('Pas de video_id');
+    return id;
+}
+
+async function pollTask(id, onProgress) {
+    let wait = 20;
+    while (wait > 0) {
+        if (state.stop) throw new Error('stop');
+        onProgress('Rendu en cours… — ' + wait + 's');
+        await sleep(1000);
+        wait--;
+    }
+    for (let i = 0; i < MAX_POLL; i++) {
+        if (state.stop) throw new Error('stop');
+        if (i > 0) {
+            let r = POLL_INTERVAL;
+            while (r > 0) {
+                if (state.stop) throw new Error('stop');
+                onProgress('La scène prend vie… — ' + r + 's');
+                await sleep(1000);
+                r--;
+            }
+        }
+        const u = POLL_BASE + '?video_id=' + encodeURIComponent(id) + '&model_name=' + encodeURIComponent(MODEL);
+        const r = await apiFetch(u, {
+            method: 'GET',
+            headers: { 'Authorization': 'Bearer ' + getKey() }
+        });
+        const d = await r.json();
+        const s = d.status || 'unknown';
+        onProgress('Rendu — ' + (d.progress || 0) + '%');
+        if (s === 'completed' || s === 'succeeded' || s === 'done') {
+            const url = (d.metadata && d.metadata.url) || d.url || (d.output && d.output.url);
+            if (!url) throw new Error('Pas d\'URL');
+            return url;
+        }
+        if (s === 'failed' || s === 'error' || s === 'cancelled') {
+            throw new Error('Échec (' + s + ')');
+        }
+    }
+    throw new Error('Délai dépassé');
+}
+
+// ══════════════════════════════════════════════════════════════════
+// FILE
+// ══════════════════════════════════════════════════════════════════
+const queue = [];
+
+function renderQueue() {
+    const q = $('queue');
+    if (!queue.length) { q.innerHTML = ''; return; }
+    q.innerHTML = queue.map(it => {
+        let icon = '○', txt = 'En attente', cls = 'pending';
+        if (it.s === 'creating') { icon = '◐'; txt = 'Préparation…'; cls = 'processing'; }
+        else if (it.s === 'processing') { icon = '◐'; txt = it.p || '…'; cls = 'processing'; }
+        else if (it.s === 'done') { icon = '●'; txt = 'Terminé'; cls = 'done'; }
+        else if (it.s === 'failed') { icon = '✕'; txt = 'Échec'; cls = 'failed'; }
+        const role = getRole(it.roleId);
+        const num = String(it.i + 1).padStart(2, '0');
+        return '<div class="q-item ' + cls + '">' +
+            '<span class="q-icon">' + icon + '</span>' +
+            '<span class="q-name">SCÈNE ' + num + ' · ' + esc(role.short) + '</span>' +
+            '<span class="q-status">' + esc(txt) + '</span>' +
+        '</div>';
+    }).join('');
+}
+
+function addGallery(url, i) {
+    $('gallery').classList.add('visible');
+    const el = document.createElement('div');
+    el.className = 'g-item';
+    const num = String(i + 1).padStart(2, '0');
+    el.innerHTML =
+        '<div class="g-num">SCÈNE ' + num + '</div>' +
+        '<video controls preload="metadata" muted playsinline>' +
+        '<source src="' + url + '" type="video/mp4">' +
+        '</video>';
+    $('gallery-grid').appendChild(el);
+}
+
+// ══════════════════════════════════════════════════════════════════
+// PIPELINE
+// ══════════════════════════════════════════════════════════════════
+async function processOne(item) {
+    try {
+        item.s = 'creating';
+        renderQueue();
+        const id = await createTask(item.scene, item.i);
+        item.start = Date.now();
+        item.s = 'processing';
+        renderQueue();
+        const url = await pollTask(id, p => { item.p = p; renderQueue(); });
+        item.s = 'done';
+        state.completed++;
+        renderQueue();
+        updateGo();
+        addGallery(url, item.i);
+    } catch (e) {
+        if (e.message !== 'stop') {
+            item.s = 'failed';
+            item.p = 'Échec';
+            state.failed++;
+            console.error('[T2V] Erreur scène ' + (item.i + 1), e.message);
+        } else {
+            item.s = 'failed';
+            item.p = 'Arrêté';
+        }
+        renderQueue();
+        updateGo();
+    }
+}
+
+async function start() {
+    if (state.running || !state.scenes.length) return;
+    if (!getKey()) { toast('Ajoutez votre clé API', 'error'); return; }
+
+    state.durationFrames = parseInt($('duration-select').value, 10);
+    state.style = $('style-select').value;
+    state.generateAudio = $('audio-checkbox').checked;
+
+    state.running = true;
+    state.stop = false;
+    state.completed = 0;
+    state.failed = 0;
+
+    queue.length = 0;
+    state.scenes.forEach((scene, i) => {
+        queue.push({ scene, i, roleId: scene.roleId, s: 'pending', p: null, start: null });
+    });
+
+    $('gallery-grid').innerHTML = '';
+    $('gallery').classList.remove('visible');
+    $('stop-btn').classList.add('visible');
+    $('go-btn').disabled = true;
+
+    await wakeLock();
+    renderQueue();
+
+    for (let i = 0; i < queue.length; i++) {
+        if (state.stop) break;
+        processOne(queue[i]);
+        if (i < queue.length - 1 && !state.stop) {
+            const waitSec = Math.ceil(CREATE_INTERVAL_MS / 1000);
+            for (let r = waitSec; r > 0; r--) {
+                if (state.stop) break;
+                setStatus('Production… — SCÈNE ' + (i + 2) + '/' + queue.length + ' dans ' + r + 's');
+                await sleep(1000);
+            }
+        }
+    }
+
+    while (queue.some(q => q.s === 'creating' || q.s === 'processing') && !state.stop) {
+        await sleep(1000);
+    }
+
+    const summary = state.stop
+        ? 'Production arrêtée — ' + state.completed + '/' + queue.length + ' scènes'
+        : '🎬 Film terminé — ' + state.completed + '/' + queue.length + ' scènes';
+    setStatus(summary);
+    await sleep(4000);
+    setStatus(null);
+
+    state.running = false;
+    state.stop = false;
+    $('stop-btn').classList.remove('visible');
+    updateGo();
+
+    if (state.completed > 0) {
+        toast(state.completed + ' scène' + (state.completed > 1 ? 's' : '') + ' générée' + (state.completed > 1 ? 's' : ''), 'success');
+    }
+}
+
+function stopAll() {
+    if (!state.running) return;
+    state.stop = true;
+    setStatus('Arrêt…');
+}
+
+// ══════════════════════════════════════════════════════════════════
+// DÉMO
+// ══════════════════════════════════════════════════════════════════
+const DEMO_SCRIPT = `Un voyageur solitaire marche dans un désert brûlant. Le soleil est écrasant, la soif le ronge.
+
+Il aperçoit au loin une silhouette vacillante. Est-ce un mirage ? Il presse le pas, son cœur bat plus fort.
+
+C'est une jeune femme, épuisée comme lui. Leurs regards se croisent. Un instant de reconnaissance silencieuse.
+
+Ils décident de continuer ensemble. Au sommet de la dernière dune, une oasis immense apparaît.
+
+L'eau coule entre leurs doigts. Ils rient, enfin libres. Le désert n'a pas eu raison d'eux.`;
+
+// ══════════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════════
+(function init() {
+    $('api-save').addEventListener('click', saveKey);
+    $('api-input').addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); saveKey(); }
+    });
+    $('api-eye').addEventListener('click', () => {
+        const i = $('api-input');
+        if (i.type === 'password') { i.type = 'text'; $('api-eye').textContent = '🙈'; }
+        else { i.type = 'password'; $('api-eye').textContent = '👁️'; }
+    });
+
+    document.querySelectorAll('[data-toggle]').forEach(h => {
+        h.addEventListener('click', () => $(h.dataset.toggle).classList.toggle('open'));
+    });
+
+    $('demo-btn').addEventListener('click', () => {
+        $('script-input').value = DEMO_SCRIPT;
+        $('film-title').value = 'Le Désert';
+        $('film-genre').value = 'Drame / Aventure';
+        toast('Exemple chargé — cliquez sur Découper', 'success');
+    });
+
+    $('split-btn').addEventListener('click', splitScript);
+
+    $('duration-select').addEventListener('change', e => {
+        state.durationFrames = parseInt(e.target.value, 10);
+        renderScenes();
+        updateGo();
+    });
+    $('style-select').addEventListener('change', e => { state.style = e.target.value; });
+    $('audio-checkbox').addEventListener('change', e => { state.generateAudio = e.target.checked; });
+
+    $('go-btn').addEventListener('click', start);
+    $('stop-btn').addEventListener('click', stopAll);
+
+    refreshApi();
+    renderScenes();
+    renderQueue();
+    updateGo();
+})();
+</script>
+
+</body>
+</html>
