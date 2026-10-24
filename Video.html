@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>🎬 Générateur de vidéo HTML</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 20px;
+      background: #0a0a0a; color: #eee;
+      font-family: system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+    }
+    h1 { text-align: center; margin: 10px 0 20px; font-size: 26px; }
+    .container { max-width: 1280px; margin: 0 auto; }
+    .panel {
+      background: #1a1a1a; border: 1px solid #333;
+      border-radius: 12px; padding: 16px; margin-bottom: 16px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+    label {
+      display: flex; flex-direction: column;
+      font-size: 13px; color: #aaa; gap: 4px;
+    }
+    input, select {
+      padding: 8px; background: #0a0a0a;
+      border: 1px solid #333; border-radius: 6px;
+      color: #fff; font-size: 14px;
+    }
+    input[type="color"] { padding: 2px; height: 38px; cursor: pointer; }
+    input[type="range"] { padding: 0; }
+    input:disabled, select:disabled { opacity: 0.5; cursor: not-allowed; }
+    canvas {
+      display: block; width: 100%; max-width: 100%;
+      height: auto; border-radius: 12px;
+      background: #000; border: 1px solid #333;
+    }
+    .buttons {
+      display: flex; flex-wrap: wrap; gap: 10px;
+      margin-top: 16px; justify-content: center;
+    }
+    button, .btn {
+      padding: 12px 24px; font-size: 15px; font-weight: 600;
+      border: none; border-radius: 8px; cursor: pointer;
+      transition: all 0.15s; text-decoration: none;
+      color: #fff; display: inline-block;
+    }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
+    #start { background: #e63946; }
+    #start:hover:not(:disabled) { background: #d62828; }
+    #stop { background: #555; }
+    #stop:hover:not(:disabled) { background: #666; }
+    #mp4 { background: #2a9d8f; }
+    #mp4:hover:not(:disabled) { background: #21867a; }
+    #dl { background: #4361ee; display: none; }
+    #dl:hover { background: #3a54d4; }
+    #status {
+      margin-top: 16px; padding: 12px; border-radius: 8px;
+      background: #1a1a1a; border: 1px solid #333;
+      text-align: center; min-height: 20px; font-size: 14px;
+    }
+    #preview { display: none; margin-top: 16px; }
+    #preview video { width: 100%; border-radius: 12px; }
+    .hint {
+      font-size: 12px; color: #666; text-align: center;
+      margin-top: 8px; line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>🎬 Générateur de vidéo HTML</h1>
+
+  <div class="panel">
+    <div class="grid">
+      <label>Résolution
+        <select id="res">
+          <option value="854x480">854 × 480 (SD)</option>
+          <option value="1280x720" selected>1280 × 720 (HD)</option>
+          <option value="1920x1080">1920 × 1080 (Full HD)</option>
+        </select>
+      </label>
+      <label>FPS
+        <select id="fps">
+          <option value="24">24 fps</option>
+          <option value="30" selected>30 fps</option>
+          <option value="60">60 fps</option>
+        </select>
+      </label>
+      <label>Durée (secondes)
+        <input type="number" id="dur" value="10" min="1" max="120">
+      </label>
+      <label>Nombre de formes
+        <input type="number" id="nb" value="12" min="1" max="40">
+      </label>
+      <label>Teinte de base
+        <input type="range" id="hue" value="340" min="0" max="360">
+      </label>
+      <label>Texte affiché
+        <input type="text" id="txt" value="Vidéo générée en HTML">
+      </label>
+    </div>
+  </div>
+
+  <div class="panel">
+    <canvas id="canvas" width="1280" height="720"></canvas>
+  </div>
+
+  <div class="buttons">
+    <button id="start">▶️ Enregistrer</button>
+    <button id="stop" disabled>⏹️ Stop</button>
+    <button id="mp4" disabled>🎞️ Convertir en MP4</button>
+    <a id="dl" class="btn" download="video.webm">⬇️ Télécharger (WebM)</a>
+  </div>
+
+  <div id="status">Prêt. Clique sur « Enregistrer » pour démarrer.</div>
+
+  <div id="preview" class="panel">
+    <p style="margin-top:0;color:#aaa;font-size:14px;">Aperçu de la vidéo enregistrée :</p>
+    <video id="videoPreview" controls></video>
+  </div>
+
+  <div class="hint">
+    💡 La conversion MP4 nécessite un serveur (SharedArrayBuffer).<br>
+    Si elle échoue, télécharge le WebM et convertis-le sur cloudconvert.com
+  </div>
+</div>
+
+<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
+<script>
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  const startBtn = document.getElementById('start');
+  const stopBtn = document.getElementById('stop');
+  const mp4Btn = document.getElementById('mp4');
+  const dl = document.getElementById('dl');
+  const status = document.getElementById('status');
+  const previewDiv = document.getElementById('preview');
+  const videoPreview = document.getElementById('videoPreview');
+
+  const config = {
+    width: 1280, height: 720, fps: 30, duration: 10,
+    text: 'Vidéo générée en HTML', baseHue: 340, shapes: 12
+  };
+
+  let recorder = null;
+  let chunks = [];
+  let recording = false;
+  let recordStart = 0;
+  let videoBlob = null;
+  const t0 = performance.now();
+
+  function setStatus(msg) { status.textContent = msg; }
+
+  function setInputsDisabled(disabled) {
+    ['res', 'fps', 'dur', 'nb', 'hue', 'txt'].forEach(id => {
+      document.getElementById(id).disabled = disabled;
+    });
+  }
+
+  function readConfig() {
+    const [w, h] = document.getElementById('res').value.split('x').map(Number);
+    config.width = w;
+    config.height = h;
+    config.fps = +document.getElementById('fps').value;
+    config.duration = Math.max(1, +document.getElementById('dur').value);
+    config.text = document.getElementById('txt').value || ' ';
+    config.baseHue = +document.getElementById('hue').value;
+    config.shapes = Math.max(1, +document.getElementById('nb').value);
+
+    if (canvas.width !== w || canvas.height !== h) {
+      canvas.width = w;
+      canvas.height = h;
+    }
+  }
+
+  function draw() {
+    readConfig();
+    const w = canvas.width, h = canvas.height;
+    const t = (performance.now() - t0) / 1000;
+    const cx = w / 2, cy = h / 2;
+    const size = Math.min(w, h);
+
+    // Fond dégradé animé
+    const grad = ctx.createLinearGradient(0, 0, w, h);
+    grad.addColorStop(0, `hsl(${(config.baseHue + t * 40) % 360}, 80%, 55%)`);
+    grad.addColorStop(1, `hsl(${(config.baseHue + 120 + t * 40) % 360}, 80%, 45%)`);
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
+
+    // Formes tournantes
+    const radius = size * 0.3;
+    for (let i = 0; i < config.shapes; i++) {
+      const a = t + i * Math.PI * 2 / config.shapes;
+      const x = cx + Math.cos(a) * radius * 1.2;
+      const y = cy + Math.sin(a * 1.3) * radius * 0.9;
+      const hue = (i * 30 + config.baseHue + t * 60) % 360;
+      ctx.beginPath();
+      ctx.arc(x, y, size * 0.05, 0, Math.PI * 2);
+      ctx.fillStyle = `hsla(${hue}, 90%, 70%, 0.85)`;
+      ctx.fill();
+    }
+
+    // Texte
+    const fs = size * 0.07;
+    ctx.font = `bold ${fs}px system-ui, -apple-system, sans-serif`;
+    ctx.fillStyle = 'white';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor = 'rgba(0,0,0,0.6)';
+    ctx.shadowBlur = size * 0.02;
+    ctx.fillText(config.text, cx, h - fs * 1.5);
+    ctx.shadowBlur = 0;
+
+    // Barre de progression + badge REC
+    if (recording) {
+      const elapsed = (performance.now() - recordStart) / 1000;
+      const progress = Math.min(elapsed / config.duration, 1);
+      ctx.fillStyle = 'rgba(0,0,0,0.5)';
+      ctx.fillRect(0, 0, w, size * 0.015);
+      ctx.fillStyle = '#ff006e';
+      ctx.fillRect(0, 0, w * progress, size * 0.015);
+
+      ctx.fillStyle = '#ff006e';
+      ctx.beginPath();
+      ctx.arc(w - 40, 40, 12, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = 'white';
+      ctx.font = 'bold 16px system-ui';
+      ctx.textAlign = 'right';
+      ctx.fillText(`REC ${elapsed.toFixed(1)}s`, w - 60, 46);
+    }
+
+    requestAnimationFrame(draw);
+  }
+
+  function startRecording() {
+    readConfig();
+    setInputsDisabled(true);
+
+    const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
+      ? 'video/webm;codecs=vp9'
+      : (MediaRecorder.isTypeSupported('video/webm;codecs=vp8')
+        ? 'video/webm;codecs=vp8'
+        : 'video/webm');
+
+    const stream = canvas.captureStream(config.fps);
+    recorder = new MediaRecorder(stream, {
+      mimeType: mime,
+      videoBitsPerSecond: 8000000
+    });
+    chunks = [];
+
+    recorder.ondataavailable = (e) => {
+      if (e.data.size > 0) chunks.push(e.data);
+    };
+
+    recorder.onstop = () => {
+      recording = false;
+      videoBlob = new Blob(chunks, { type: 'video/webm' });
+      const url = URL.createObjectURL(videoBlob);
+
+      dl.href = url;
+      dl.style.display = 'inline-block';
+
+      videoPreview.src = url;
+      previewDiv.style.display = 'block';
+
+      mp4Btn.disabled = false;
+      startBtn.disabled = false;
+      stopBtn.disabled = true;
+      setInputsDisabled(false);
+
+      setStatus('✅ Vidéo prête ! Télécharge-la ou convertis en MP4.');
+    };
+
+    recorder.start();
+    recording = true;
+    recordStart = performance.now();
+    startBtn.disabled = true;
+    stopBtn.disabled = false;
+    dl.style.display = 'none';
+    mp4Btn.disabled = true;
+    setStatus(`🔴 Enregistrement (${config.duration}s)...`);
+
+    setTimeout(() => {
+      if (recording) stopRecording();
+    }, config.duration * 1000);
+  }
+
+  function stopRecording() {
+    if (recorder && recorder.state !== 'inactive') {
+      recorder.stop();
+    }
+  }
+
+  async function convertToMP4() {
+    if (!videoBlob) return;
+
+    if (typeof SharedArrayBuffer === 'undefined') {
+      setStatus('❌ SharedArrayBuffer indisponible (page file://). Télécharge le WebM et convertis-le sur cloudconvert.com');
+      return;
+    }
+    if (typeof FFmpeg === 'undefined') {
+      setStatus('❌ FFmpeg non chargé (connexion ?). Utilise cloudconvert.com pour convertir le WebM.');
+      return;
+    }
+
+    try {
+      setStatus('⏳ Chargement de FFmpeg (peut prendre ~30s)...');
+      const { createFFmpeg, fetchFile } = FFmpeg;
+      const ffmpeg = createFFmpeg({ log: false });
+      if (!ffmpeg.isLoaded()) await ffmpeg.load();
+
+      setStatus('⏳ Conversion en cours...');
+      ffmpeg.FS('writeFile', 'input.webm', await fetchFile(videoBlob));
+      await ffmpeg.run(
+        '-i', 'input.webm',
+        '-c:v', 'libx264',
+        '-crf', '23',
+        '-pix_fmt', 'yuv420p',
+        'output.mp4'
+      );
+
+      const data = ffmpeg.FS('readFile', 'output.mp4');
+      const mp4Blob = new Blob([data], { type: 'video/mp4' });
+      const url = URL.createObjectURL(mp4Blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'video.mp4';
+      a.click();
+      setStatus('✅ MP4 téléchargé !');
+    } catch (err) {
+      console.error(err);
+      setStatus('❌ Échec. Télécharge le WebM et convertis-le sur cloudconvert.com');
+    }
+  }
+
+  startBtn.addEventListener('click', startRecording);
+  stopBtn.addEventListener('click', stopRecording);
+  mp4Btn.addEventListener('click', convertToMP4);
+
+  draw();
+</script>
+</body>
+</html>
