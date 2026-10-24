@@ -1,351 +1,529 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>🎬 Générateur de vidéo HTML</title>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0; padding: 20px;
-      background: #0a0a0a; color: #eee;
-      font-family: system-ui, -apple-system, sans-serif;
-      min-height: 100vh;
-    }
-    h1 { text-align: center; margin: 10px 0 20px; font-size: 26px; }
-    .container { max-width: 1280px; margin: 0 auto; }
-    .panel {
-      background: #1a1a1a; border: 1px solid #333;
-      border-radius: 12px; padding: 16px; margin-bottom: 16px;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 12px;
-    }
-    label {
-      display: flex; flex-direction: column;
-      font-size: 13px; color: #aaa; gap: 4px;
-    }
-    input, select {
-      padding: 8px; background: #0a0a0a;
-      border: 1px solid #333; border-radius: 6px;
-      color: #fff; font-size: 14px;
-    }
-    input[type="color"] { padding: 2px; height: 38px; cursor: pointer; }
-    input[type="range"] { padding: 0; }
-    input:disabled, select:disabled { opacity: 0.5; cursor: not-allowed; }
-    canvas {
-      display: block; width: 100%; max-width: 100%;
-      height: auto; border-radius: 12px;
-      background: #000; border: 1px solid #333;
-    }
-    .buttons {
-      display: flex; flex-wrap: wrap; gap: 10px;
-      margin-top: 16px; justify-content: center;
-    }
-    button, .btn {
-      padding: 12px 24px; font-size: 15px; font-weight: 600;
-      border: none; border-radius: 8px; cursor: pointer;
-      transition: all 0.15s; text-decoration: none;
-      color: #fff; display: inline-block;
-    }
-    button:disabled { opacity: 0.4; cursor: not-allowed; }
-    #start { background: #e63946; }
-    #start:hover:not(:disabled) { background: #d62828; }
-    #stop { background: #555; }
-    #stop:hover:not(:disabled) { background: #666; }
-    #mp4 { background: #2a9d8f; }
-    #mp4:hover:not(:disabled) { background: #21867a; }
-    #dl { background: #4361ee; display: none; }
-    #dl:hover { background: #3a54d4; }
-    #status {
-      margin-top: 16px; padding: 12px; border-radius: 8px;
-      background: #1a1a1a; border: 1px solid #333;
-      text-align: center; min-height: 20px; font-size: 14px;
-    }
-    #preview { display: none; margin-top: 16px; }
-    #preview video { width: 100%; border-radius: 12px; }
-    .hint {
-      font-size: 12px; color: #666; text-align: center;
-      margin-top: 8px; line-height: 1.5;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>Le Mystère du Mary Celeste — Vidéo</title>
+<style>
+  body{margin:0;background:#000;color:#eee;font-family:system-ui,sans-serif;text-align:center;padding:20px}
+  canvas{max-width:100%;max-height:70vh;border-radius:12px;border:1px solid #333}
+  button{padding:14px 28px;font-size:16px;font-weight:600;border:none;border-radius:8px;cursor:pointer;margin:8px;color:#fff}
+  #play{background:#e63946}#rec{background:#4361ee}#rec:disabled,#play:disabled{opacity:.4;cursor:not-allowed}
+  #dl{background:#2a9d8f;display:none;text-decoration:none;padding:14px 28px;border-radius:8px;color:#fff;font-weight:600}
+  #status{margin:16px;color:#aaa;min-height:24px}
+</style>
 </head>
 <body>
-<div class="container">
-  <h1>🎬 Générateur de vidéo HTML</h1>
 
-  <div class="panel">
-    <div class="grid">
-      <label>Résolution
-        <select id="res">
-          <option value="854x480">854 × 480 (SD)</option>
-          <option value="1280x720" selected>1280 × 720 (HD)</option>
-          <option value="1920x1080">1920 × 1080 (Full HD)</option>
-        </select>
-      </label>
-      <label>FPS
-        <select id="fps">
-          <option value="24">24 fps</option>
-          <option value="30" selected>30 fps</option>
-          <option value="60">60 fps</option>
-        </select>
-      </label>
-      <label>Durée (secondes)
-        <input type="number" id="dur" value="10" min="1" max="120">
-      </label>
-      <label>Nombre de formes
-        <input type="number" id="nb" value="12" min="1" max="40">
-      </label>
-      <label>Teinte de base
-        <input type="range" id="hue" value="340" min="0" max="360">
-      </label>
-      <label>Texte affiché
-        <input type="text" id="txt" value="Vidéo générée en HTML">
-      </label>
-    </div>
-  </div>
-
-  <div class="panel">
-    <canvas id="canvas" width="1280" height="720"></canvas>
-  </div>
-
-  <div class="buttons">
-    <button id="start">▶️ Enregistrer</button>
-    <button id="stop" disabled>⏹️ Stop</button>
-    <button id="mp4" disabled>🎞️ Convertir en MP4</button>
-    <a id="dl" class="btn" download="video.webm">⬇️ Télécharger (WebM)</a>
-  </div>
-
-  <div id="status">Prêt. Clique sur « Enregistrer » pour démarrer.</div>
-
-  <div id="preview" class="panel">
-    <p style="margin-top:0;color:#aaa;font-size:14px;">Aperçu de la vidéo enregistrée :</p>
-    <video id="videoPreview" controls></video>
-  </div>
-
-  <div class="hint">
-    💡 La conversion MP4 nécessite un serveur (SharedArrayBuffer).<br>
-    Si elle échoue, télécharge le WebM et convertis-le sur cloudconvert.com
-  </div>
+<h2>🎬 Le Mystère du Mary Celeste</h2>
+<canvas id="c" width="1080" height="1920"></canvas>
+<div>
+  <button id="play">▶️ Aperçu (avec son)</button>
+  <button id="rec">🎬 Enregistrer la vidéo</button>
+  <a id="dl" download="mary-celeste.webm">⬇️ Télécharger WebM</a>
 </div>
+<div id="status">Prêt.</div>
 
-<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
 <script>
-  const canvas = document.getElementById('canvas');
-  const ctx = canvas.getContext('2d');
-  const startBtn = document.getElementById('start');
-  const stopBtn = document.getElementById('stop');
-  const mp4Btn = document.getElementById('mp4');
-  const dl = document.getElementById('dl');
-  const status = document.getElementById('status');
-  const previewDiv = document.getElementById('preview');
-  const videoPreview = document.getElementById('videoPreview');
+// ============ CONFIG ============
+const W = 1080, H = 1920;
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const status = document.getElementById('status');
 
-  const config = {
-    width: 1280, height: 720, fps: 30, duration: 10,
-    text: 'Vidéo générée en HTML', baseHue: 340, shapes: 12
+const SCENES = [
+  { start:0,  end:4,  voice:"Dans la cale du Mary Celeste, il y avait mille sept cent un barils d'alcool industriel.",
+    text:"1 701 barils d'alcool... et un mystère", draw:drawS1, sfx:['drop','thud'] },
+  { start:4,  end:8,  voice:"Neuf d'entre eux étaient complètement vides, ou avaient fui.",
+    text:"9 barils VIDES", draw:drawS2, sfx:['creak'] },
+  { start:8,  end:13, voice:"L'hypothèse ? Des vapeurs invisibles, un craquement suspect, et la terreur d'une explosion imminente.",
+    text:"Vapeurs explosives ?", draw:drawS3, sfx:['hiss','heartbeat'] },
+  { start:13, end:18, voice:"En panique, le capitaine fait évacuer tout le monde sur le canot, relié au navire par un simple cordage.",
+    text:"Évacuation d'urgence", draw:drawS4, sfx:['splash'] },
+  { start:18, end:23, voice:"Sauf que... le cordage cède.",
+    text:"Le cordage CÈDE !", draw:drawS5, sfx:['snap'] },
+  { start:23, end:28, voice:"Le canot dérive lentement dans l'immensité. Le Mary Celeste, lui, continue sa route... seul.",
+    text:"Abandonnés en pleine mer", draw:drawS6, sfx:['wind'] },
+  { start:28, end:33, voice:"En 2006, la science a prouvé que ces vapeurs créent une onde de choc spectaculaire, sans laisser de brûlure.",
+    text:"Test scientifique (2006) : onde de choc sans feu", draw:drawS7, sfx:['whoosh'] },
+  { start:33, end:37, voice:"Mais attention : cela reste une hypothèse, jamais une preuve absolue.",
+    text:"HYPOTHÈSE, PAS UNE PREUVE", draw:drawS8, sfx:['bell'] },
+  { start:37, end:40, voice:"Et toi, tu penses que c'est ce qui s'est passé ? Dis-le-moi en commentaire !",
+    text:"Et toi, t'y crois ? Dis-le en commentaire !", draw:drawS9, sfx:['synthRise','ding'] },
+];
+const TOTAL = 40;
+
+// ============ AUDIO ============
+let audioCtx, masterGain, recDest;
+function initAudio() {
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  masterGain = audioCtx.createGain();
+  masterGain.gain.value = 0.6;
+  masterGain.connect(audioCtx.destination);
+  recDest = audioCtx.createMediaStreamDestination();
+  masterGain.connect(recDest);
+}
+function now() { return audioCtx.currentTime; }
+
+function tone(t, f0, f1, dur, vol, type='sine') {
+  const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+  o.type = type;
+  o.frequency.setValueAtTime(f0, t);
+  o.frequency.exponentialRampToValueAtTime(Math.max(f1,1), t + dur);
+  g.gain.setValueAtTime(vol, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  o.connect(g).connect(masterGain); o.start(t); o.stop(t + dur + 0.05);
+}
+function noise(t, dur, filterType, f0, f1, vol) {
+  const sr = audioCtx.sampleRate;
+  const buf = audioCtx.createBuffer(1, sr * dur, sr);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  const src = audioCtx.createBufferSource(); src.buffer = buf;
+  const f = audioCtx.createBiquadFilter(); f.type = filterType;
+  f.frequency.setValueAtTime(f0, t);
+  f.frequency.exponentialRampToValueAtTime(Math.max(f1,1), t + dur);
+  const g = audioCtx.createGain();
+  g.gain.setValueAtTime(vol, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  src.connect(f).connect(g).connect(masterGain); src.start(t); src.stop(t + dur);
+}
+
+const SFX = {
+  drop:      t => { tone(t, 1400, 400, 0.12, 0.35); tone(t+0.02, 800, 200, 0.15, 0.2); },
+  thud:      t => tone(t, 90, 35, 0.6, 0.7),
+  creak:     t => { for (let i=0;i<3;i++) noise(t+i*0.15, 0.4, 'bandpass', 400, 200, 0.15); },
+  hiss:      t => noise(t, 1.5, 'highpass', 800, 4000, 0.2),
+  heartbeat: t => { tone(t, 80, 40, 0.15, 0.5); tone(t+0.2, 80, 40, 0.15, 0.4); tone(t+0.9, 80, 40, 0.15, 0.5); tone(t+1.1, 80, 40, 0.15, 0.4); },
+  splash:    t => { noise(t, 0.6, 'lowpass', 3000, 300, 0.35); tone(t, 200, 80, 0.3, 0.25); },
+  snap:      t => { noise(t, 0.08, 'highpass', 2000, 6000, 0.7); tone(t, 400, 100, 0.1, 0.4); },
+  wind:      t => { noise(t, 3, 'bandpass', 400, 800, 0.15); noise(t+1, 2, 'bandpass', 600, 300, 0.1); },
+  whoosh:    t => { noise(t, 0.8, 'bandpass', 200, 3000, 0.5); tone(t, 100, 800, 0.8, 0.15, 'sawtooth'); },
+  bell:      t => { tone(t, 880, 880, 1.5, 0.3); tone(t, 1320, 1320, 1.2, 0.15); },
+  synthRise: t => tone(t, 200, 800, 0.8, 0.2, 'sawtooth'),
+  ding:      t => { tone(t, 1500, 1500, 0.3, 0.3); tone(t+0.05, 2000, 2000, 0.3, 0.15); },
+};
+
+// ============ DESSINS DES SCÈNES ============
+// Chaque fonction reçoit (ctx, t_local, W, H)
+
+function vignette(ctx, W, H) {
+  const vg = ctx.createRadialGradient(W/2, H/2, W*0.2, W/2, H/2, W*0.9);
+  vg.addColorStop(0, 'rgba(0,0,0,0)');
+  vg.addColorStop(1, 'rgba(0,0,0,0.85)');
+  ctx.fillStyle = vg; ctx.fillRect(0,0,W,H);
+}
+function barrel(ctx, x, y, r, hue=30, empty=false) {
+  const g = ctx.createRadialGradient(x-r*0.3, y-r*0.3, 0, x, y, r);
+  if (empty) { g.addColorStop(0,'#3a2a1a'); g.addColorStop(1,'#0f0803'); }
+  else { g.addColorStop(0,`hsl(${hue},40%,35%)`); g.addColorStop(1,`hsl(${hue},60%,10%)`); }
+  ctx.fillStyle = g;
+  ctx.beginPath(); ctx.ellipse(x, y, r, r*1.25, 0, 0, Math.PI*2); ctx.fill();
+  ctx.strokeStyle = '#1a0e05'; ctx.lineWidth = r*0.12;
+  for (let i=-1; i<=1; i++) {
+    ctx.beginPath(); ctx.ellipse(x, y+i*r*0.7, r*0.95, r*0.14, 0, 0, Math.PI*2); ctx.stroke();
+  }
+}
+
+// Plan 1 — Barils dans la cale, zoom avant
+function drawS1(ctx, t, W, H) {
+  ctx.fillStyle = '#0a0604'; ctx.fillRect(0,0,W,H);
+  const zoom = 1 + t*0.18;
+  ctx.save(); ctx.translate(W/2, H/2); ctx.scale(zoom, zoom); ctx.translate(-W/2, -H/2);
+  const bs = [
+    [W*0.15,H*0.35,W*0.18],[W*0.5,H*0.28,W*0.22],[W*0.85,H*0.38,W*0.17],
+    [W*0.3,H*0.65,W*0.2],[W*0.7,H*0.72,W*0.21],[W*0.5,H*0.95,W*0.24],
+    [W*0.1,H*0.85,W*0.16],[W*0.9,H*0.9,W*0.18],
+  ];
+  bs.forEach((b,i) => barrel(ctx, b[0], b[1], b[2], 25 + i*4));
+  ctx.restore(); vignette(ctx, W, H);
+}
+
+// Plan 2 — 9 barils dont 1 vide/marqué
+function drawS2(ctx, t, W, H) {
+  ctx.fillStyle = '#080a0a'; ctx.fillRect(0,0,W,H);
+  const cols=3, rows=3, cw=W*0.28, ch=H*0.15;
+  const startX = (W - cols*cw)/2 + cw/2, startY = H*0.2;
+  for (let i=0; i<9; i++) {
+    const cx = startX + (i%cols)*cw;
+    const cy = startY + Math.floor(i/cols)*ch;
+    const isEmpty = i===4;
+    barrel(ctx, cx, cy, W*0.11, 25, isEmpty);
+    if (isEmpty) {
+      // Marque rouge pulsée
+      const pulse = 1 + Math.sin(t*8)*0.15;
+      ctx.fillStyle = '#ff0033';
+      ctx.font = `bold ${W*0.09*pulse}px 'Arial Black'`;
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('X', cx, cy);
+    }
+  }
+  ctx.fillStyle='#ff3344'; ctx.font=`bold ${W*0.11}px 'Arial Black'`;
+  ctx.textAlign='center';
+  ctx.fillText('9 VIDES', W/2, H*0.87);
+  vignette(ctx, W, H);
+}
+
+// Plan 3 — Vapeurs + visage terrifié
+function drawS3(ctx, t, W, H) {
+  ctx.fillStyle = '#0a0a12'; ctx.fillRect(0,0,W,H);
+  for (let i=0; i<25; i++) {
+    const x = (i*173 + t*50) % W;
+    const y = H - ((Math.sin(i*7.31) + 1)/2) * H*0.55 - t*40;
+    const r = 50 + Math.sin(i + t*3)*30;
+    const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, 'rgba(180,210,255,0.28)');
+    g.addColorStop(1, 'rgba(180,210,255,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.fill();
+  }
+  // Visage
+  ctx.fillStyle='#141414';
+  ctx.beginPath(); ctx.ellipse(W/2, H*0.42, W*0.2, H*0.24, 0, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle='#fff';
+  ctx.beginPath();
+  ctx.arc(W/2-W*0.07, H*0.38, W*0.045, 0, Math.PI*2);
+  ctx.arc(W/2+W*0.07, H*0.38, W*0.045, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle='#000';
+  const eyeShift = Math.sin(t*12)*W*0.005;
+  ctx.beginPath();
+  ctx.arc(W/2-W*0.07+eyeShift, H*0.38, W*0.015, 0, Math.PI*2);
+  ctx.arc(W/2+W*0.07+eyeShift, H*0.38, W*0.015, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle='#000';
+  ctx.beginPath(); ctx.ellipse(W/2, H*0.52, W*0.035, H*0.055, 0, 0, Math.PI*2); ctx.fill();
+  vignette(ctx, W, H);
+}
+
+// Plan 4 — Évacuation
+function drawS4(ctx, t, W, H) {
+  ctx.fillStyle = '#0a0f18'; ctx.fillRect(0,0,W,H);
+  // Mer
+  const seaY = H*0.7;
+  ctx.fillStyle = '#1a2a3a'; ctx.fillRect(0, seaY, W, H-seaY);
+  for (let i=0; i<15; i++) {
+    ctx.strokeStyle=`rgba(120,180,230,${0.1+Math.sin(t*3+i)*0.05})`;
+    ctx.lineWidth=3; ctx.beginPath();
+    const y = seaY + i*H*0.02;
+    ctx.moveTo(0, y);
+    for (let x=0; x<=W; x+=30) ctx.lineTo(x, y + Math.sin(x*0.02 + t*4 + i)*8);
+    ctx.stroke();
+  }
+  // Navire
+  ctx.fillStyle='#2a1a10';
+  ctx.fillRect(W*0.15, seaY-H*0.18, W*0.5, H*0.18);
+  ctx.fillStyle='#1a0a05';
+  ctx.fillRect(W*0.35, seaY-H*0.3, W*0.06, H*0.12);
+  // Canot descendant
+  const boatY = seaY - H*0.05 + t*H*0.012;
+  ctx.fillStyle='#4a3a20';
+  ctx.beginPath();
+  ctx.moveTo(W*0.72, boatY);
+  ctx.lineTo(W*0.95, boatY);
+  ctx.lineTo(W*0.9, boatY+H*0.04);
+  ctx.lineTo(W*0.77, boatY+H*0.04);
+  ctx.closePath(); ctx.fill();
+  // Cordage
+  ctx.strokeStyle='#d4b480'; ctx.lineWidth=3;
+  ctx.beginPath();
+  ctx.moveTo(W*0.5, seaY-H*0.15);
+  ctx.quadraticCurveTo(W*0.7, seaY-H*0.05, W*0.83, boatY);
+  ctx.stroke();
+  vignette(ctx, W, H);
+}
+
+// Plan 5 — Cordage qui cède
+function drawS5(ctx, t, W, H) {
+  ctx.fillStyle='#0a0a0a'; ctx.fillRect(0,0,W,H);
+  const progress = Math.min(t/4, 1);
+  const breakX = W*0.4 + progress*W*0.1;
+  const tension = Math.sin(t*20)*4*(1-progress);
+  // Corde gauche
+  ctx.strokeStyle='#d4b480'; ctx.lineWidth=14;
+  ctx.beginPath();
+  ctx.moveTo(0, H*0.5);
+  ctx.quadraticCurveTo(W*0.2, H*0.5 + tension, breakX-20, H*0.5);
+  ctx.stroke();
+  // Corde droite
+  if (progress < 0.9) {
+    ctx.beginPath();
+    ctx.moveTo(breakX+20, H*0.5);
+    ctx.quadraticCurveTo(W*0.8, H*0.5 + tension, W, H*0.5);
+    ctx.stroke();
+  } else {
+    // Rupture — la corde droite tombe
+    const fall = (progress-0.9)*10;
+    ctx.beginPath();
+    ctx.moveTo(breakX+20, H*0.5 + fall*H);
+    ctx.quadraticCurveTo(W*0.8, H*0.5+fall*H, W, H*0.5+fall*H*1.5);
+    ctx.stroke();
+  }
+  // Frayures
+  if (progress > 0.6) {
+    ctx.strokeStyle='#f0d090'; ctx.lineWidth=2;
+    for (let i=0; i<8; i++) {
+      const a = Math.random()*Math.PI*2;
+      const d = 10 + Math.random()*40*(progress-0.6);
+      ctx.beginPath();
+      ctx.moveTo(breakX, H*0.5);
+      ctx.lineTo(breakX+Math.cos(a)*d, H*0.5+Math.sin(a)*d);
+      ctx.stroke();
+    }
+  }
+  // Flash blanc à la rupture
+  if (progress > 0.85 && progress < 0.95) {
+    ctx.fillStyle=`rgba(255,255,255,${1-(progress-0.85)*10})`;
+    ctx.fillRect(0,0,W,H);
+  }
+  vignette(ctx, W, H);
+}
+
+// Plan 6 — Dérive dans la brume (vue du dessus)
+function drawS6(ctx, t, W, H) {
+  ctx.fillStyle='#1a2530'; ctx.fillRect(0,0,W,H);
+  // Brume
+  for (let i=0; i<40; i++) {
+    const x = (i*97 + t*20) % W;
+    const y = (i*61 + t*15) % H;
+    const r = 60 + Math.sin(i + t)*30;
+    const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, 'rgba(220,225,235,0.15)');
+    g.addColorStop(1, 'rgba(220,225,235,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.fill();
+  }
+  // Navire (grand)
+  ctx.fillStyle = '#3a2a1a';
+  ctx.beginPath();
+  ctx.ellipse(W*0.3, H*0.4, W*0.08, H*0.16, 0, 0, Math.PI*2); ctx.fill();
+  // Canot (petit, s'éloigne)
+  const bx = W*0.3 + t*W*0.08, by = H*0.4 + t*H*0.1;
+  ctx.fillStyle = '#7a5a30';
+  ctx.beginPath(); ctx.ellipse(bx, by, W*0.025, H*0.04, 0, 0, Math.PI*2); ctx.fill();
+  // Sillage
+  ctx.strokeStyle='rgba(200,200,220,0.3)'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(W*0.3, H*0.4); ctx.lineTo(bx, by); ctx.stroke();
+  vignette(ctx, W, H);
+}
+
+// Plan 7 — Test 2006, onde de choc
+function drawS7(ctx, t, W, H) {
+  ctx.fillStyle='#0a0a0a'; ctx.fillRect(0,0,W,H);
+  const progress = Math.min(t/5, 1);
+  // Anneaux concentriques
+  for (let i=0; i<4; i++) {
+    const r = (progress * W * 0.8) - i*60;
+    if (r > 0 && r < W*0.9) {
+      ctx.strokeStyle=`rgba(180,220,255,${(1-progress)*0.6})`;
+      ctx.lineWidth = 8 - i*1.5;
+      ctx.beginPath(); ctx.arc(W/2, H/2, r, 0, Math.PI*2); ctx.stroke();
+    }
+  }
+  // Cœur central
+  const coreR = W*0.15 * (1 - progress*0.3);
+  const g = ctx.createRadialGradient(W/2, H/2, 0, W/2, H/2, coreR);
+  g.addColorStop(0, `rgba(255,255,255,${1-progress*0.5})`);
+  g.addColorStop(1, 'rgba(120,180,255,0)');
+  ctx.fillStyle = g;
+  ctx.beginPath(); ctx.arc(W/2, H/2, coreR, 0, Math.PI*2); ctx.fill();
+  // Étiquette "no fire"
+  ctx.fillStyle='#fff'; ctx.font=`bold ${W*0.05}px system-ui`;
+  ctx.textAlign='center';
+  ctx.fillText('⚡ onde de choc — sans flamme', W/2, H*0.85);
+  vignette(ctx, W, H);
+}
+
+// Plan 8 — Navire fantôme + tampon
+function drawS8(ctx, t, W, H) {
+  ctx.fillStyle='#0a0a12'; ctx.fillRect(0,0,W,H);
+  // Navire figé
+  ctx.fillStyle = '#2a2a35';
+  ctx.beginPath();
+  ctx.moveTo(W*0.2, H*0.55);
+  ctx.lineTo(W*0.8, H*0.55);
+  ctx.lineTo(W*0.7, H*0.72);
+  ctx.lineTo(W*0.3, H*0.72);
+  ctx.closePath(); ctx.fill();
+  ctx.fillRect(W*0.45, H*0.35, W*0.03, H*0.2);
+  ctx.fillRect(W*0.55, H*0.42, W*0.03, H*0.13);
+  // Brume basse
+  for (let i=0; i<15; i++) {
+    const x = i*80, y = H*0.72 + Math.sin(i+t)*10;
+    const g = ctx.createRadialGradient(x, y, 0, x, y, 100);
+    g.addColorStop(0,'rgba(150,150,180,0.2)');
+    g.addColorStop(1,'rgba(150,150,180,0)');
+    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,100,0,Math.PI*2); ctx.fill();
+  }
+  // Tampon rouge (apparaît à t=1.5s)
+  if (t > 1.5) {
+    const st = Math.min((t-1.5)*4, 1);
+    const scale = 1 + (1-st)*0.5;
+    const rotate = -0.15;
+    ctx.save();
+    ctx.translate(W/2, H*0.42);
+    ctx.rotate(rotate);
+    ctx.scale(scale, scale);
+    ctx.globalAlpha = st;
+    ctx.strokeStyle = '#ff0033'; ctx.lineWidth = W*0.015;
+    ctx.strokeRect(-W*0.35, -H*0.06, W*0.7, H*0.12);
+    ctx.fillStyle = '#ff0033';
+    ctx.font = `bold ${W*0.08}px 'Arial Black'`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('HYPOTHÈSE', 0, -H*0.018);
+    ctx.font = `bold ${W*0.05}px 'Arial Black'`;
+    ctx.fillText('PAS UNE PREUVE', 0, H*0.035);
+    ctx.restore();
+  }
+  vignette(ctx, W, H);
+}
+
+// Plan 9 — CTA, point d'interrogation
+function drawS9(ctx, t, W, H) {
+  ctx.fillStyle='#0a0a12'; ctx.fillRect(0,0,W,H);
+  const bounce = Math.abs(Math.sin(t*3)) * H*0.03;
+  ctx.save();
+  ctx.translate(W/2, H*0.4 - bounce);
+  ctx.fillStyle = '#ff006e';
+  ctx.font = `bold ${W*0.5}px 'Arial Black'`;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.shadowColor='#ff006e'; ctx.shadowBlur=40;
+  ctx.fillText('?', 0, 0);
+  ctx.restore();
+  // Texte CTA
+  ctx.fillStyle='#fff'; ctx.font=`bold ${W*0.06}px 'Arial Black'`;
+  ctx.textAlign='center';
+  ctx.fillText('↓ Commentaire ↓', W/2, H*0.78);
+  vignette(ctx, W, H);
+}
+
+// ============ OVERLAY TEXTE ============
+function drawText(ctx, text, W, H) {
+  if (!text) return;
+  ctx.save();
+  const fs = W*0.052;
+  ctx.font = `bold ${fs}px 'Arial Black', system-ui`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  // Wrap
+  const maxW = W*0.85;
+  const words = text.split(' ');
+  const lines = [];
+  let line = '';
+  for (const w of words) {
+    const test = line ? line + ' ' + w : w;
+    if (ctx.measureText(test).width > maxW && line) { lines.push(line); line = w; }
+    else line = test;
+  }
+  if (line) lines.push(line);
+  const lineH = fs * 1.3;
+  const totalH = lines.length * lineH;
+  const y0 = H*0.87 - totalH/2;
+  // Pill
+  const maxLineW = Math.max(...lines.map(l => ctx.measureText(l).width));
+  const pad = fs*0.6;
+  ctx.fillStyle = 'rgba(0,0,0,0.8)';
+  ctx.beginPath();
+  const rx = W/2 - maxLineW/2 - pad, ry = y0 - pad;
+  const rw = maxLineW + pad*2, rh = totalH + pad*2;
+  const r = fs*0.35;
+  ctx.moveTo(rx+r, ry);
+  ctx.lineTo(rx+rw-r, ry); ctx.quadraticCurveTo(rx+rw, ry, rx+rw, ry+r);
+  ctx.lineTo(rx+rw, ry+rh-r); ctx.quadraticCurveTo(rx+rw, ry+rh, rx+rw-r, ry+rh);
+  ctx.lineTo(rx+r, ry+rh); ctx.quadraticCurveTo(rx, ry+rh, rx, ry+rh-r);
+  ctx.lineTo(rx, ry+r); ctx.quadraticCurveTo(rx, ry, rx+r, ry);
+  ctx.fill();
+  // Texte
+  ctx.fillStyle = '#fff';
+  lines.forEach((l, i) => ctx.fillText(l, W/2, y0 + i*lineH + lineH/2));
+  ctx.restore();
+}
+
+// ============ TIMELINE ============
+let timelineStart = 0;
+let timelineRunning = false;
+
+function findScene(elapsed) {
+  for (const s of SCENES) if (elapsed >= s.start && elapsed < s.end) return s;
+  return null;
+}
+
+function renderFrame() {
+  const elapsed = (performance.now() - timelineStart) / 1000;
+  const scene = findScene(elapsed);
+  ctx.clearRect(0,0,W,H);
+  if (scene) {
+    const localT = elapsed - scene.start;
+    scene.draw(ctx, localT, W, H);
+    // Fondu d'entrée/sortie du texte
+    const ft = Math.min(localT/0.3, 1);
+    const fo = Math.min((scene.end - scene.start - localT)/0.3, 1);
+    ctx.globalAlpha = Math.min(ft, fo);
+    drawText(ctx, scene.text, W, H);
+    ctx.globalAlpha = 1;
+  }
+  if (elapsed < TOTAL) requestAnimationFrame(renderFrame);
+  else timelineRunning = false;
+}
+
+function scheduleAudio() {
+  const t0 = audioCtx.currentTime + 0.05;
+  SCENES.forEach(s => {
+    const ts = t0 + s.start;
+    s.sfx.forEach(name => { if (SFX[name]) SFX[name](ts); });
+    // Voix off
+    if ('speechSynthesis' in window) {
+      const u = new SpeechSynthesisUtterance(s.voice);
+      u.lang = 'fr-FR'; u.rate = 1.05; u.pitch = 0.95;
+      setTimeout(() => speechSynthesis.speak(u), s.start * 1000);
+    }
+  });
+}
+
+async function playPreview() {
+  initAudio(); await audioCtx.resume();
+  timelineStart = performance.now();
+  timelineRunning = true;
+  status.textContent = '▶️ Lecture en cours (voix + SFX)...';
+  scheduleAudio();
+  renderFrame();
+  setTimeout(() => { status.textContent = '✅ Aperçu terminé.'; }, TOTAL * 1000);
+}
+
+async function recordVideo() {
+  initAudio(); await audioCtx.resume();
+  const stream = canvas.captureStream(30);
+  const audioStream = recDest.stream;
+  const combined = new MediaStream([
+    ...stream.getVideoTracks(),
+    ...audioStream.getAudioTracks()
+  ]);
+  const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
+    ? 'video/webm;codecs=vp9' : 'video/webm';
+  const recorder = new MediaRecorder(combined, { mimeType: mime, videoBitsPerSecond: 8_000_000 });
+  const chunks = [];
+  recorder.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
+  recorder.onstop = () => {
+    const blob = new Blob(chunks, { type:'video/webm' });
+    const url = URL.createObjectURL(blob);
+    const dl = document.getElementById('dl');
+    dl.href = url; dl.style.display = 'inline-block';
+    status.textContent = `✅ Vidéo prête (${(blob.size/1024/1024).toFixed(1)} Mo). Clique sur le bouton de téléchargement.`;
+    document.getElementById('rec').disabled = false;
   };
+  recorder.start();
+  timelineStart = performance.now();
+  timelineRunning = true;
+  scheduleAudio();
+  renderFrame();
+  status.textContent = '🔴 Enregistrement en cours...';
+  document.getElementById('rec').disabled = true;
+  setTimeout(() => { if (recorder.state !== 'inactive') recorder.stop(); }, TOTAL * 1000);
+}
 
-  let recorder = null;
-  let chunks = [];
-  let recording = false;
-  let recordStart = 0;
-  let videoBlob = null;
-  const t0 = performance.now();
+document.getElementById('play').onclick = playPreview;
+document.getElementById('rec').onclick = recordVideo;
 
-  function setStatus(msg) { status.textContent = msg; }
-
-  function setInputsDisabled(disabled) {
-    ['res', 'fps', 'dur', 'nb', 'hue', 'txt'].forEach(id => {
-      document.getElementById(id).disabled = disabled;
-    });
-  }
-
-  function readConfig() {
-    const [w, h] = document.getElementById('res').value.split('x').map(Number);
-    config.width = w;
-    config.height = h;
-    config.fps = +document.getElementById('fps').value;
-    config.duration = Math.max(1, +document.getElementById('dur').value);
-    config.text = document.getElementById('txt').value || ' ';
-    config.baseHue = +document.getElementById('hue').value;
-    config.shapes = Math.max(1, +document.getElementById('nb').value);
-
-    if (canvas.width !== w || canvas.height !== h) {
-      canvas.width = w;
-      canvas.height = h;
-    }
-  }
-
-  function draw() {
-    readConfig();
-    const w = canvas.width, h = canvas.height;
-    const t = (performance.now() - t0) / 1000;
-    const cx = w / 2, cy = h / 2;
-    const size = Math.min(w, h);
-
-    // Fond dégradé animé
-    const grad = ctx.createLinearGradient(0, 0, w, h);
-    grad.addColorStop(0, `hsl(${(config.baseHue + t * 40) % 360}, 80%, 55%)`);
-    grad.addColorStop(1, `hsl(${(config.baseHue + 120 + t * 40) % 360}, 80%, 45%)`);
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, w, h);
-
-    // Formes tournantes
-    const radius = size * 0.3;
-    for (let i = 0; i < config.shapes; i++) {
-      const a = t + i * Math.PI * 2 / config.shapes;
-      const x = cx + Math.cos(a) * radius * 1.2;
-      const y = cy + Math.sin(a * 1.3) * radius * 0.9;
-      const hue = (i * 30 + config.baseHue + t * 60) % 360;
-      ctx.beginPath();
-      ctx.arc(x, y, size * 0.05, 0, Math.PI * 2);
-      ctx.fillStyle = `hsla(${hue}, 90%, 70%, 0.85)`;
-      ctx.fill();
-    }
-
-    // Texte
-    const fs = size * 0.07;
-    ctx.font = `bold ${fs}px system-ui, -apple-system, sans-serif`;
-    ctx.fillStyle = 'white';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.shadowColor = 'rgba(0,0,0,0.6)';
-    ctx.shadowBlur = size * 0.02;
-    ctx.fillText(config.text, cx, h - fs * 1.5);
-    ctx.shadowBlur = 0;
-
-    // Barre de progression + badge REC
-    if (recording) {
-      const elapsed = (performance.now() - recordStart) / 1000;
-      const progress = Math.min(elapsed / config.duration, 1);
-      ctx.fillStyle = 'rgba(0,0,0,0.5)';
-      ctx.fillRect(0, 0, w, size * 0.015);
-      ctx.fillStyle = '#ff006e';
-      ctx.fillRect(0, 0, w * progress, size * 0.015);
-
-      ctx.fillStyle = '#ff006e';
-      ctx.beginPath();
-      ctx.arc(w - 40, 40, 12, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = 'white';
-      ctx.font = 'bold 16px system-ui';
-      ctx.textAlign = 'right';
-      ctx.fillText(`REC ${elapsed.toFixed(1)}s`, w - 60, 46);
-    }
-
-    requestAnimationFrame(draw);
-  }
-
-  function startRecording() {
-    readConfig();
-    setInputsDisabled(true);
-
-    const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
-      ? 'video/webm;codecs=vp9'
-      : (MediaRecorder.isTypeSupported('video/webm;codecs=vp8')
-        ? 'video/webm;codecs=vp8'
-        : 'video/webm');
-
-    const stream = canvas.captureStream(config.fps);
-    recorder = new MediaRecorder(stream, {
-      mimeType: mime,
-      videoBitsPerSecond: 8000000
-    });
-    chunks = [];
-
-    recorder.ondataavailable = (e) => {
-      if (e.data.size > 0) chunks.push(e.data);
-    };
-
-    recorder.onstop = () => {
-      recording = false;
-      videoBlob = new Blob(chunks, { type: 'video/webm' });
-      const url = URL.createObjectURL(videoBlob);
-
-      dl.href = url;
-      dl.style.display = 'inline-block';
-
-      videoPreview.src = url;
-      previewDiv.style.display = 'block';
-
-      mp4Btn.disabled = false;
-      startBtn.disabled = false;
-      stopBtn.disabled = true;
-      setInputsDisabled(false);
-
-      setStatus('✅ Vidéo prête ! Télécharge-la ou convertis en MP4.');
-    };
-
-    recorder.start();
-    recording = true;
-    recordStart = performance.now();
-    startBtn.disabled = true;
-    stopBtn.disabled = false;
-    dl.style.display = 'none';
-    mp4Btn.disabled = true;
-    setStatus(`🔴 Enregistrement (${config.duration}s)...`);
-
-    setTimeout(() => {
-      if (recording) stopRecording();
-    }, config.duration * 1000);
-  }
-
-  function stopRecording() {
-    if (recorder && recorder.state !== 'inactive') {
-      recorder.stop();
-    }
-  }
-
-  async function convertToMP4() {
-    if (!videoBlob) return;
-
-    if (typeof SharedArrayBuffer === 'undefined') {
-      setStatus('❌ SharedArrayBuffer indisponible (page file://). Télécharge le WebM et convertis-le sur cloudconvert.com');
-      return;
-    }
-    if (typeof FFmpeg === 'undefined') {
-      setStatus('❌ FFmpeg non chargé (connexion ?). Utilise cloudconvert.com pour convertir le WebM.');
-      return;
-    }
-
-    try {
-      setStatus('⏳ Chargement de FFmpeg (peut prendre ~30s)...');
-      const { createFFmpeg, fetchFile } = FFmpeg;
-      const ffmpeg = createFFmpeg({ log: false });
-      if (!ffmpeg.isLoaded()) await ffmpeg.load();
-
-      setStatus('⏳ Conversion en cours...');
-      ffmpeg.FS('writeFile', 'input.webm', await fetchFile(videoBlob));
-      await ffmpeg.run(
-        '-i', 'input.webm',
-        '-c:v', 'libx264',
-        '-crf', '23',
-        '-pix_fmt', 'yuv420p',
-        'output.mp4'
-      );
-
-      const data = ffmpeg.FS('readFile', 'output.mp4');
-      const mp4Blob = new Blob([data], { type: 'video/mp4' });
-      const url = URL.createObjectURL(mp4Blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'video.mp4';
-      a.click();
-      setStatus('✅ MP4 téléchargé !');
-    } catch (err) {
-      console.error(err);
-      setStatus('❌ Échec. Télécharge le WebM et convertis-le sur cloudconvert.com');
-    }
-  }
-
-  startBtn.addEventListener('click', startRecording);
-  stopBtn.addEventListener('click', stopRecording);
-  mp4Btn.addEventListener('click', convertToMP4);
-
-  draw();
+// Première image (aperçu statique)
+drawS1(ctx, 0, W, H);
+drawText(ctx, "1 701 barils d'alcool... et un mystère", W, H);
 </script>
 </body>
 </html>
