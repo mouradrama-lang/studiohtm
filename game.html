@@ -3,73 +3,42 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Chah Mat - Prototype Jouable HTML5 (Sahra Royale)</title>
+  <title>Chah Mat - Sahra Royale v2</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Chivo:ital,wght@0,300;0,400;0,600;0,700;0,900;1,400&family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
   <script>
     tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Chivo', 'Cairo', 'sans-serif'],
-            arabic: ['Cairo', 'sans-serif'],
-          },
-          colors: {
-            sahara: {
-              DEFAULT: '#e07a28',
-              50: '#fef7ee',
-              100: '#fdedd6',
-              200: '#fad7ac',
-              300: '#f6ba77',
-              400: '#f19441',
-              500: '#e07a28',
-              600: '#cb5c18',
-              700: '#a84216',
-              800: '#873418',
-              900: '#6e2c17',
-              950: '#3b1409',
-            },
-            oasis: '#2dd4bf',
-            sandstone: '#221a15',
-          }
+      theme: { extend: {
+        fontFamily: { sans: ['Chivo','Cairo','sans-serif'], arabic: ['Cairo','sans-serif'] },
+        colors: {
+          sahara: { DEFAULT:'#e07a28',50:'#fef7ee',100:'#fdedd6',200:'#fad7ac',300:'#f6ba77',400:'#f19441',500:'#e07a28',600:'#cb5c18',700:'#a84216',800:'#873418',900:'#6e2c17',950:'#3b1409' },
+          oasis: '#2dd4bf', sandstone: '#221a15'
         }
-      }
+      }}
     };
   </script>
   <style>
-    body {
-      touch-action: none;
-      -webkit-touch-callout: none;
-      -webkit-user-select: none;
-      user-select: none;
+    body { touch-action: none; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+    .game-canvas { image-rendering: pixelated; }
+    .hud-glass { background: rgba(18,13,10,0.78); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+    #damage-vignette {
+      background: radial-gradient(ellipse at center, transparent 40%, rgba(220,38,38,0.8) 100%);
+      opacity: 0; pointer-events: none; position: absolute; inset: 0; z-index: 5;
     }
-    .game-canvas {
-      image-rendering: pixelated;
-    }
-    @keyframes pulse-zone {
-      0%, 100% { border-color: rgba(224, 122, 40, 0.4); }
-      50% { border-color: rgba(224, 122, 40, 0.9); }
-    }
-    .hud-glass {
-      background: rgba(18, 13, 10, 0.78);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-    }
+    #kill-feed > div { animation: feedIn 0.22s ease-out; }
+    @keyframes feedIn { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    .btn-shoot { touch-action: none; }
   </style>
 </head>
 <body class="h-full w-full bg-stone-950 flex flex-col items-center justify-center p-0 m-0 font-sans text-stone-100 overflow-hidden relative">
 
-  <!-- ZONE DE JEU PRINCIPALE (CONTAINER RESPONSIVE ADAPTÉ MOBILE & DESKTOP) -->
   <div id="game-container" class="relative w-full h-full max-w-md sm:max-h-[920px] sm:rounded-3xl sm:border sm:border-stone-800 shadow-2xl overflow-hidden bg-[#18120f] flex flex-col">
-    
-    <!-- CANVAS 2D INTERACTIF -->
     <canvas id="canvas" class="w-full h-full game-canvas absolute inset-0 block cursor-crosshair z-0"></canvas>
+    <div id="damage-vignette"></div>
 
-    <!-- TOP APP BAR / STATS DUELS EN DIRECT (HUD) -->
-    <header id="ingame-hud" class="relative z-10 p-3 pt-4 flex items-center justify-between pointer-events-none transition-opacity duration-300">
-      <!-- Survivants & Kills -->
+    <header id="ingame-hud" class="relative z-10 p-3 pt-4 flex items-center justify-between pointer-events-none">
       <div class="flex items-center gap-2">
         <div class="hud-glass border border-stone-700/60 rounded-xl px-2.5 py-1.5 flex items-center gap-2 shadow-lg">
           <div class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></div>
@@ -84,16 +53,14 @@
           <span class="text-stone-400 text-[10px]">إقصاء</span>
         </div>
       </div>
-
-      <!-- Tempête & Radar de zone -->
       <div class="flex items-center gap-2">
         <div class="hud-glass border border-amber-600/50 rounded-xl px-2.5 py-1.5 flex items-center gap-2 shadow-lg">
           <svg class="w-3.5 h-3.5 text-sahara animate-spin" style="animation-duration: 9s;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
           </svg>
           <div class="flex flex-col text-right">
-            <span class="text-[9px] uppercase tracking-wider text-amber-300 font-semibold">Chhili (الشهيلي)</span>
-            <span id="hud-storm-timer" class="text-xs font-mono font-bold text-white">03:00</span>
+            <span class="text-[9px] uppercase tracking-wider text-amber-300 font-semibold">Chhili</span>
+            <span id="hud-storm-timer" class="text-xs font-mono font-bold text-white">03:30</span>
           </div>
         </div>
         <button id="btn-sound-toggle" class="pointer-events-auto p-2 rounded-xl hud-glass border border-stone-700/60 text-stone-300 hover:text-white active:scale-95 transition">
@@ -104,23 +71,20 @@
       </div>
     </header>
 
-    <!-- MESSAGE D'ALERTE DYNAMIQUE AU MILIEU (ex: Zone se rétrécit / Kill feed) -->
     <div id="game-feed" class="absolute top-20 left-0 right-0 z-10 flex flex-col items-center pointer-events-none transition-all duration-300 opacity-0 transform -translate-y-2">
-      <div id="game-feed-box" class="hud-glass border border-amber-500/50 text-amber-300 px-4 py-1.5 rounded-full text-xs font-semibold shadow-xl flex items-center gap-2">
-        <span id="game-feed-icon">⚠️</span>
-        <span id="game-feed-text">La tempête de sable commence à se refermer !</span>
+      <div class="hud-glass border border-amber-500/50 text-amber-300 px-4 py-1.5 rounded-full text-xs font-semibold shadow-xl flex items-center gap-2">
+        <span>⚠️</span>
+        <span id="game-feed-text">La tempête de sable se referme !</span>
       </div>
     </div>
 
-    <!-- HUD BAS : BARRE DE VIE + SLOTS D'ARMES + CONTRÔLES TACTILES -->
+    <!-- KILL FEED (RIGHT) -->
+    <div id="kill-feed" class="absolute top-20 right-3 z-10 flex flex-col gap-1 items-end pointer-events-none"></div>
+
     <div id="ingame-bottom" class="mt-auto relative z-10 p-3 pb-5 flex flex-col gap-2.5 pointer-events-none">
-      
-      <!-- Barre de vie & armure -->
       <div class="hud-glass p-2.5 rounded-2xl border border-stone-800/80 shadow-2xl flex flex-col gap-1.5 pointer-events-auto">
         <div class="flex items-center justify-between text-[11px] font-bold text-stone-300">
-          <span class="flex items-center gap-1.5">
-            <span class="text-rose-500 text-xs">❤️</span> Santé (صحة اللاعب)
-          </span>
+          <span class="flex items-center gap-1.5"><span class="text-rose-500 text-xs">❤️</span> Santé</span>
           <span id="hud-hp-val" class="font-mono text-emerald-400">100 / 100</span>
         </div>
         <div class="w-full h-3 bg-stone-900 rounded-full overflow-hidden p-0.5 border border-stone-800">
@@ -128,61 +92,49 @@
         </div>
       </div>
 
-      <!-- Sélecteur des 3 Armes & Munitions -->
       <div class="grid grid-cols-3 gap-1.5 pointer-events-auto">
-        <!-- Arme 1 : El-Gommia -->
         <button id="weapon-btn-0" class="weapon-btn hud-glass p-2 rounded-xl border border-amber-500 bg-amber-500/10 flex flex-col items-center justify-center transition active:scale-95 text-center">
           <div class="flex items-center justify-between w-full text-[9px] text-stone-400 mb-0.5">
-            <span class="font-mono font-bold text-amber-400">#1</span>
-            <span class="text-emerald-400">صامت</span>
+            <span class="font-mono font-bold text-amber-400">#1</span><span class="text-emerald-400">صامت</span>
           </div>
           <div class="text-xs font-black text-amber-300 truncate w-full">El-Gommia</div>
           <div class="text-[10px] text-stone-400 mt-0.5">Lance-pierre</div>
           <div class="text-[11px] font-mono font-extrabold text-amber-400 mt-0.5">∞</div>
         </button>
-
-        <!-- Arme 2 : Pistolet 9mm -->
         <button id="weapon-btn-1" class="weapon-btn hud-glass p-2 rounded-xl border border-stone-800/80 opacity-60 flex flex-col items-center justify-center transition active:scale-95 text-center">
           <div class="flex items-center justify-between w-full text-[9px] text-stone-400 mb-0.5">
-            <span class="font-mono font-bold text-stone-400">#2</span>
-            <span>سريع</span>
+            <span class="font-mono font-bold text-stone-400">#2</span><span>سريع</span>
           </div>
           <div class="text-xs font-black text-stone-200 truncate w-full">Pistolet 9mm</div>
           <div class="text-[10px] text-stone-400 mt-0.5">Casbah Spec</div>
-          <div id="weapon-ammo-1" class="text-[11px] font-mono font-extrabold text-stone-300 mt-0.5">24 balles</div>
+          <div id="weapon-ammo-1" class="text-[11px] font-mono font-extrabold text-stone-300 mt-0.5">12/36</div>
         </button>
-
-        <!-- Arme 3 : Makrouf -->
         <button id="weapon-btn-2" class="weapon-btn hud-glass p-2 rounded-xl border border-stone-800/80 opacity-60 flex flex-col items-center justify-center transition active:scale-95 text-center">
           <div class="flex items-center justify-between w-full text-[9px] text-stone-400 mb-0.5">
-            <span class="font-mono font-bold text-stone-400">#3</span>
-            <span class="text-rose-400">قوي</span>
+            <span class="font-mono font-bold text-stone-400">#3</span><span class="text-rose-400">قوي</span>
           </div>
           <div class="text-xs font-black text-stone-200 truncate w-full">Makrouf</div>
           <div class="text-[10px] text-stone-400 mt-0.5">Fusil Chasse</div>
-          <div id="weapon-ammo-2" class="text-[11px] font-mono font-extrabold text-stone-300 mt-0.5">8 cart.</div>
+          <div id="weapon-ammo-2" class="text-[11px] font-mono font-extrabold text-stone-300 mt-0.5">4/8</div>
         </button>
       </div>
 
-      <!-- MANETTES TACTILES D'ÉCRAN (JOYSTICK VIRTUEL GAUCHE + BOUTON TIR DROITE) -->
       <div class="flex items-center justify-between pt-1 px-2 pointer-events-auto select-none">
-        <!-- Zone Joystick Virtuel Gauche -->
         <div id="joystick-zone" class="relative w-28 h-28 rounded-full border-2 border-stone-700/40 bg-stone-900/40 backdrop-blur-sm flex items-center justify-center touch-none">
           <div id="joystick-knob" class="w-12 h-12 rounded-full bg-gradient-to-tr from-amber-600 to-amber-400 shadow-lg border border-amber-300/40 transform pointer-events-none transition-transform duration-75"></div>
           <span class="absolute text-[9px] text-stone-500 tracking-wider pointer-events-none font-bold">DÉPLACER</span>
         </div>
 
-        <!-- Commandes Clavier Aide (Desktop) -->
         <div class="hidden sm:flex flex-col items-center text-[10px] text-stone-400 bg-stone-900/80 border border-stone-800 px-3 py-1.5 rounded-xl">
-          <span class="text-amber-400 font-bold mb-0.5">Contrôles Clavier :</span>
-          <span><b class="text-white">Z Q S D</b> ou <b class="text-white">Flèches</b> : Courir</span>
-          <span><b class="text-white">Clic GAUCHE</b> ou <b class="text-white">Espace</b> : Tirer</span>
-          <span><b class="text-white">1, 2, 3</b> : Changer d'arme</span>
+          <span class="text-amber-400 font-bold mb-0.5">Clavier :</span>
+          <span><b class="text-white">ZQSD/WASD</b> : Courir</span>
+          <span><b class="text-white">Souris</b> : Viser</span>
+          <span><b class="text-white">Clic/Space</b> : Tirer</span>
+          <span><b class="text-white">R</b> : Recharger • <b class="text-white">1/2/3</b> Arme</span>
         </div>
 
-        <!-- Bouton Tir / Action Droite -->
         <div class="flex flex-col items-center gap-2">
-          <button id="btn-shoot" class="w-24 h-24 rounded-full bg-gradient-to-b from-amber-500 to-sahara-700 active:scale-90 border-4 border-amber-300/60 shadow-[0_0_25px_rgba(224,122,40,0.45)] flex flex-col items-center justify-center text-white font-black transition transform">
+          <button id="btn-shoot" class="btn-shoot w-24 h-24 rounded-full bg-gradient-to-b from-amber-500 to-sahara-700 active:scale-90 border-4 border-amber-300/60 shadow-[0_0_25px_rgba(224,122,40,0.45)] flex flex-col items-center justify-center text-white font-black transition transform">
             <svg class="w-7 h-7 text-stone-950 mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
@@ -190,24 +142,19 @@
           </button>
         </div>
       </div>
-
     </div>
 
-    <!-- ÉCRAN D'ACCUEIL / MENU PRINCIPAL (OVERLAY) -->
     <div id="screen-menu" class="absolute inset-0 z-20 bg-stone-950/95 backdrop-blur-md flex flex-col items-center justify-between p-6 transition-all duration-500">
-      
-      <!-- Top header bar du menu -->
       <div class="w-full flex items-center justify-between text-xs text-stone-400 border-b border-stone-800/80 pb-3">
         <div class="flex items-center gap-2">
           <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-          <span class="font-bold text-stone-200">100% Hors-Ligne (محلي)</span>
+          <span class="font-bold text-stone-200">100% Hors-Ligne</span>
         </div>
         <div class="flex items-center gap-1.5 bg-stone-900 border border-stone-800 px-2 py-1 rounded-lg text-[10px] text-amber-400 font-mono">
-          <span>FPS : 60</span> | <span>RAM : 74 Mo</span>
+          <span>v2.0</span> | <span>24 bots</span>
         </div>
       </div>
 
-      <!-- Logo & Identité Saharienne -->
       <div class="flex flex-col items-center text-center my-auto">
         <div class="relative w-28 h-28 mb-4 flex items-center justify-center">
           <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-sahara-600 to-amber-400 blur-xl opacity-40 animate-pulse"></div>
@@ -217,979 +164,1012 @@
             </svg>
           </div>
         </div>
-
         <h1 class="text-3xl font-black text-amber-400 tracking-wider font-arabic mb-1">كش مات : معركة الصحراء</h1>
         <h2 class="text-lg font-extrabold tracking-widest text-stone-100 uppercase">CHAH MAT : SAHRA ROYALE</h2>
         <p class="text-xs text-stone-400 max-w-xs mt-2 leading-relaxed">
-          Survivez face à 24 mercenaires dans les ruelles fortifiées de la Casbah et les dunes du Sahara sous la tempête de sable.
+          Survivez face à 24 mercenaires qui s'entretuent. Ramassez munitions et soins, restez dans le cercle.
         </p>
-
-        <!-- Sélecteur de difficulté / Bots -->
         <div class="mt-5 flex items-center gap-2 bg-stone-900/90 border border-stone-800 px-3 py-2 rounded-xl text-xs">
           <span class="text-stone-400">Mode :</span>
-          <span class="text-amber-400 font-bold">1 Joueur vs 24 Bots</span>
-          <span class="text-stone-600">•</span>
-          <span class="text-emerald-400 font-semibold">Match rapide 5 min</span>
+          <span class="text-amber-400 font-bold">Battle Royale • 25 joueurs</span>
         </div>
       </div>
 
-      <!-- Boutons d'action -->
       <div class="w-full flex flex-col gap-3">
         <button id="btn-start-game" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-amber-500 via-sahara to-amber-600 hover:from-amber-400 hover:to-sahara text-stone-950 font-black text-lg shadow-xl shadow-amber-900/40 active:scale-98 transition transform flex items-center justify-center gap-3">
-          <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24">
-            <path d="M8 5v14l11-7z"/>
-          </svg>
-          <span>ابدأ المعركة • LANCER LA PARTIE</span>
+          <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          <span>LANCER LA PARTIE</span>
         </button>
-
         <div class="flex items-center justify-between text-xs text-stone-500 px-2 pt-1">
-          <span>Version HTML5 WebGL / Canvas</span>
-          <span>© 2025 Algérie Gaming</span>
+          <span>HTML5 Canvas</span><span>© 2025 Algérie Gaming</span>
         </div>
       </div>
     </div>
 
-    <!-- ÉCRAN DE FIN DE PARTIE : VICTOIRE OU DÉFAITE (OVERLAY) -->
     <div id="screen-gameover" class="absolute inset-0 z-30 bg-stone-950/95 backdrop-blur-md flex flex-col items-center justify-between p-6 hidden transition-all duration-300">
-      
-      <!-- Titre Victoire / Défaite -->
       <div class="w-full flex flex-col items-center text-center mt-6">
-        <div id="gameover-badge" class="w-20 h-20 rounded-full flex items-center justify-center text-4xl shadow-2xl mb-3 border-2">
-          🏆
-        </div>
-        <h2 id="gameover-title" class="text-3xl font-black text-amber-400 font-arabic">مبروك ! المرتبة الأولى</h2>
-        <p id="gameover-subtitle" class="text-sm font-bold text-stone-300 mt-1 uppercase tracking-wider">! TOP 1 ! MABROUK !</p>
+        <div id="gameover-badge" class="w-20 h-20 rounded-full flex items-center justify-center text-4xl shadow-2xl mb-3 border-2">🏆</div>
+        <h2 id="gameover-title" class="text-3xl font-black text-amber-400 font-arabic">مبروك !</h2>
+        <p id="gameover-subtitle" class="text-sm font-bold text-stone-300 mt-1 uppercase tracking-wider">TOP 1 !</p>
       </div>
-
-      <!-- Statistiques du Duel -->
       <div class="w-full bg-stone-900/90 border border-stone-800 rounded-2xl p-4 flex flex-col gap-3">
         <div class="text-xs font-bold text-amber-400 uppercase tracking-wider border-b border-stone-800 pb-2 flex items-center justify-between">
-          <span>Rapport de Mission</span>
-          <span class="text-stone-400">تقرير المعركة</span>
+          <span>Rapport de Mission</span><span class="text-stone-400">تقرير المعركة</span>
         </div>
-
         <div class="grid grid-cols-2 gap-3 text-center">
           <div class="bg-stone-950/60 p-2.5 rounded-xl border border-stone-800/80">
-            <span class="text-[11px] text-stone-400 block">Classement Final</span>
+            <span class="text-[11px] text-stone-400 block">Classement</span>
             <span id="gameover-rank" class="text-2xl font-black text-amber-400 font-mono">#1</span>
           </div>
           <div class="bg-stone-950/60 p-2.5 rounded-xl border border-stone-800/80">
-            <span class="text-[11px] text-stone-400 block">Éliminations (Kills)</span>
+            <span class="text-[11px] text-stone-400 block">Éliminations</span>
             <span id="gameover-kills" class="text-2xl font-black text-rose-400 font-mono">0</span>
           </div>
           <div class="bg-stone-950/60 p-2.5 rounded-xl border border-stone-800/80">
             <span class="text-[11px] text-stone-400 block">Survie</span>
-            <span id="gameover-time" class="text-base font-bold text-stone-200 font-mono">02:45</span>
+            <span id="gameover-time" class="text-base font-bold text-stone-200 font-mono">00:00</span>
           </div>
           <div class="bg-stone-950/60 p-2.5 rounded-xl border border-stone-800/80">
-            <span class="text-[11px] text-stone-400 block">Dégâts infligés</span>
-            <span id="gameover-damage" class="text-base font-bold text-emerald-400 font-mono">380 pts</span>
+            <span class="text-[11px] text-stone-400 block">Dégâts</span>
+            <span id="gameover-damage" class="text-base font-bold text-emerald-400 font-mono">0 pts</span>
           </div>
         </div>
-
-        <div class="text-[11px] text-center text-stone-400 pt-1">
-          💾 Score automatiquement enregistré dans votre historique local.
-        </div>
       </div>
-
-      <!-- Boutons rejouer -->
       <div class="w-full flex flex-col gap-2.5">
-        <button id="btn-restart" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-amber-500 via-sahara to-amber-600 hover:from-amber-400 hover:to-sahara text-stone-950 font-black text-base shadow-xl active:scale-98 transition transform flex items-center justify-center gap-2">
-          <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
-            <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
-          </svg>
-          <span>REJOUER (إعادة اللعب)</span>
+        <button id="btn-restart" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-amber-500 via-sahara to-amber-600 text-stone-950 font-black text-base shadow-xl active:scale-98 transition transform flex items-center justify-center gap-2">
+          <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+          <span>REJOUER</span>
         </button>
-        <button id="btn-back-menu" class="w-full py-2.5 text-stone-400 hover:text-white text-xs font-semibold text-center transition">
-          Retour au Menu Principal
-        </button>
+        <button id="btn-back-menu" class="w-full py-2.5 text-stone-400 hover:text-white text-xs font-semibold text-center transition">Retour au Menu</button>
       </div>
-
     </div>
-
   </div>
 
-  <!-- SCRIPT DU MOTEUR DU JEU HTML5 CANVAS (CHAH MAT ENGINE) -->
-  <script>
-    (function() {
-      // Éléments du DOM
-      const canvas = document.getElementById('canvas');
-      const ctx = canvas.getContext('2d');
-      const container = document.getElementById('game-container');
-      
-      const hudAlive = document.getElementById('hud-alive');
-      const hudKills = document.getElementById('hud-kills');
-      const hudStormTimer = document.getElementById('hud-storm-timer');
-      const hudHpVal = document.getElementById('hud-hp-val');
-      const hudHpBar = document.getElementById('hud-hp-bar');
-      
-      const screenMenu = document.getElementById('screen-menu');
-      const screenGameOver = document.getElementById('screen-gameover');
-      const btnStartGame = document.getElementById('btn-start-game');
-      const btnRestart = document.getElementById('btn-restart');
-      const btnBackMenu = document.getElementById('btn-back-menu');
-      const btnShoot = document.getElementById('btn-shoot');
-      
-      const gameFeed = document.getElementById('game-feed');
-      const gameFeedText = document.getElementById('game-feed-text');
-      
-      const weaponBtns = [
-        document.getElementById('weapon-btn-0'),
-        document.getElementById('weapon-btn-1'),
-        document.getElementById('weapon-btn-2')
-      ];
-      const weaponAmmoTexts = [
-        null,
-        document.getElementById('weapon-ammo-1'),
-        document.getElementById('weapon-ammo-2')
-      ];
+<script>
+(function() {
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  const container = document.getElementById('game-container');
+  const damageVignetteEl = document.getElementById('damage-vignette');
+  const killFeedEl = document.getElementById('kill-feed');
 
-      // Configuration Audio Synthétisée (Web Audio API sans fichiers externes pour être 100% autonome et immédiat)
-      let audioCtx = null;
-      let soundEnabled = true;
+  const hudAlive = document.getElementById('hud-alive');
+  const hudKills = document.getElementById('hud-kills');
+  const hudStormTimer = document.getElementById('hud-storm-timer');
+  const hudHpVal = document.getElementById('hud-hp-val');
+  const hudHpBar = document.getElementById('hud-hp-bar');
 
-      function initAudio() {
-        if (!audioCtx) {
-          const AudioContext = window.AudioContext || window.webkitAudioContext;
-          if (AudioContext) audioCtx = new AudioContext();
-        }
-        if (audioCtx && audioCtx.state === 'suspended') {
-          audioCtx.resume();
-        }
-      }
+  const screenMenu = document.getElementById('screen-menu');
+  const screenGameOver = document.getElementById('screen-gameover');
+  const btnStartGame = document.getElementById('btn-start-game');
+  const btnRestart = document.getElementById('btn-restart');
+  const btnBackMenu = document.getElementById('btn-back-menu');
+  const btnShoot = document.getElementById('btn-shoot');
+  const gameFeed = document.getElementById('game-feed');
+  const gameFeedText = document.getElementById('game-feed-text');
 
-      function playSound(type) {
-        if (!soundEnabled || !audioCtx) return;
-        try {
-          const now = audioCtx.currentTime;
-          const osc = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
-          osc.connect(gain);
-          gain.connect(audioCtx.destination);
+  const weaponBtns = [
+    document.getElementById('weapon-btn-0'),
+    document.getElementById('weapon-btn-1'),
+    document.getElementById('weapon-btn-2')
+  ];
+  const weaponAmmoTexts = [null, document.getElementById('weapon-ammo-1'), document.getElementById('weapon-ammo-2')];
 
-          if (type === 'shoot_slingshot') {
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(400, now);
-            osc.frequency.exponentialRampToValueAtTime(150, now + 0.12);
-            gain.gain.setValueAtTime(0.25, now);
-            gain.gain.linearRampToValueAtTime(0.01, now + 0.12);
-            osc.start(now);
-            osc.stop(now + 0.12);
-          } else if (type === 'shoot_gun') {
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(800, now);
-            osc.frequency.exponentialRampToValueAtTime(80, now + 0.15);
-            gain.gain.setValueAtTime(0.35, now);
-            gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
-            osc.start(now);
-            osc.stop(now + 0.15);
-          } else if (type === 'shoot_shotgun') {
-            osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(300, now);
-            osc.frequency.exponentialRampToValueAtTime(40, now + 0.3);
-            gain.gain.setValueAtTime(0.5, now);
-            gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
-            osc.start(now);
-            osc.stop(now + 0.3);
-          } else if (type === 'hit') {
-            osc.type = 'square';
-            osc.frequency.setValueAtTime(140, now);
-            osc.frequency.exponentialRampToValueAtTime(60, now + 0.08);
-            gain.gain.setValueAtTime(0.3, now);
-            gain.gain.linearRampToValueAtTime(0.01, now + 0.08);
-            osc.start(now);
-            osc.stop(now + 0.08);
-          } else if (type === 'victory') {
-            const notes = [440, 554, 659, 880];
-            notes.forEach((freq, i) => {
-              const o = audioCtx.createOscillator();
-              const g = audioCtx.createGain();
-              o.connect(g);
-              g.connect(audioCtx.destination);
-              o.type = 'triangle';
-              o.frequency.value = freq;
-              g.gain.setValueAtTime(0.2, now + i * 0.12);
-              g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.3);
-              o.start(now + i * 0.12);
-              o.stop(now + i * 0.12 + 0.35);
-            });
-          }
-        } catch (e) {
-          console.warn("Audio note err:", e);
-        }
-      }
-
-      document.getElementById('btn-sound-toggle').addEventListener('click', () => {
-        soundEnabled = !soundEnabled;
-        const icon = document.getElementById('icon-sound');
-        icon.classList.toggle('text-amber-400', soundEnabled);
-        icon.classList.toggle('text-stone-600', !soundEnabled);
-      });
-
-      // TAILLE & GÉOMÉTRIE DE LA CARTE DU JEU (2000 x 2000 pixels)
-      const MAP_SIZE = 1800;
-      let width = 0;
-      let height = 0;
-
-      function resize() {
-        const rect = container.getBoundingClientRect();
-        width = rect.width;
-        height = rect.height;
-        canvas.width = width;
-        canvas.height = height;
-      }
-      window.addEventListener('resize', resize);
-      resize();
-
-      // ARMES CONFIG
-      const WEAPONS = [
-        { name: "El-Gommia", cooldown: 280, damage: 20, speed: 11, spread: 0.04, color: "#f59e0b", radius: 4, ammo: Infinity, sound: 'shoot_slingshot' },
-        { name: "Pistolet 9mm", cooldown: 180, damage: 28, speed: 15, spread: 0.06, color: "#38bdf8", radius: 3.5, ammo: 24, sound: 'shoot_gun' },
-        { name: "Makrouf", cooldown: 700, damage: 55, speed: 13, spread: 0.22, color: "#fb7185", radius: 3, ammo: 8, pellets: 4, sound: 'shoot_shotgun' }
-      ];
-
-      // DÉFINITION DU MONDE : OBSTACLES (Maisons de Casbah et Murs)
-      const buildings = [
-        { x: 300, y: 300, w: 220, h: 180, label: "Dar Casbah Nord" },
-        { x: 700, y: 250, w: 260, h: 200, label: "Souk Artisanal" },
-        { x: 1250, y: 350, w: 280, h: 220, label: "Remparts Kasbah" },
-        { x: 260, y: 800, w: 240, h: 260, label: "Palais des Rais" },
-        { x: 750, y: 750, w: 320, h: 320, label: "Place Centrale (Sahat Ech-Chouhada)" },
-        { x: 1300, y: 850, w: 250, h: 240, label: "Fort Saïd" },
-        { x: 400, y: 1300, w: 260, h: 200, label: "Minaret Bab Jedid" },
-        { x: 900, y: 1350, w: 300, h: 240, label: "Oasis des Palmiers" },
-        { x: 1400, y: 1300, w: 220, h: 280, label: "Entrepôt Saharien" }
-      ];
-
-      // ÉTAT DU JEU
-      let gameState = 'MENU'; // 'MENU', 'PLAYING', 'GAMEOVER'
-      let matchStartTime = 0;
-      let totalDamageDealt = 0;
-      let playerKills = 0;
-
-      // JOUEUR
-      let player = {
-        x: 900,
-        y: 1050,
-        radius: 16,
-        speed: 4.0,
-        hp: 100,
-        maxHp: 100,
-        angle: 0,
-        activeWeaponIdx: 0,
-        lastShootTime: 0,
-        isDead: false
-      };
-
-      // BOTS (24 BOTS)
-      let bots = [];
-      const BOT_NAMES = [
-        "Kader_99", "Fennec_Dz", "Casbah_Ghost", "Desert_Eagle", "Amine_Algiers", 
-        "Redouane_Sniper", "Yacine_Dune", "Rachid_Pro", "Sahara_Fox", "Brahim_Tornado", 
-        "Bilal_Oran", "Sofiane_Storm", "Walid_Casbah", "Mustapha_31", "Farid_Hunter", 
-        "Hadj_Tactical", "Mehdi_Speed", "Zinedine_Striker", "Nassim_Casbah", "Tarek_Warrior", 
-        "SidAli_Blade", "Hamza_Rider", "Karim_Scout", "Omar_Sahil"
-      ];
-
-      // PROJECTILES
-      let bullets = [];
-
-      // TEMPÊTE DE SABLE (STORM ZONE - CHHILI)
-      let storm = {
-        centerX: 900,
-        centerY: 900,
-        radius: 1200,
-        minRadius: 80,
-        duration: 210, // 3 minutes 30s de partie intense
-        damageTimer: 0
-      };
-
-      // SYSTÈME DE TOUCH & JOYSTICK VIRTUEL
-      let joystick = {
-        active: false,
-        touchId: null,
-        startX: 0,
-        startY: 0,
-        currentX: 0,
-        currentY: 0,
-        dx: 0,
-        dy: 0,
-        maxRadius: 40
-      };
-
-      const joystickZone = document.getElementById('joystick-zone');
-      const joystickKnob = document.getElementById('joystick-knob');
-
-      // CONTRÔLES CLAVIER (PC)
-      const keys = {};
-      window.addEventListener('keydown', (e) => {
-        keys[e.key.toLowerCase()] = true;
-        if (e.key === '1') selectWeapon(0);
-        if (e.key === '2') selectWeapon(1);
-        if (e.key === '3') selectWeapon(2);
-        if (e.key === ' ' || e.code === 'Space') {
-          tryShoot();
-        }
-      });
-      window.addEventListener('keyup', (e) => {
-        keys[e.key.toLowerCase()] = false;
-      });
-
-      // SÉLECTION D'ARMES
-      function selectWeapon(idx) {
-        if (player.activeWeaponIdx === idx) return;
-        player.activeWeaponIdx = idx;
-        weaponBtns.forEach((btn, i) => {
-          if (i === idx) {
-            btn.classList.add('border-amber-500', 'bg-amber-500/10', 'opacity-100');
-            btn.classList.remove('border-stone-800/80', 'opacity-60');
-          } else {
-            btn.classList.remove('border-amber-500', 'bg-amber-500/10', 'opacity-100');
-            btn.classList.add('border-stone-800/80', 'opacity-60');
-          }
+  // ==================== AUDIO ====================
+  let audioCtx = null, soundEnabled = true;
+  function initAudio() {
+    if (!audioCtx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) audioCtx = new AC();
+    }
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  }
+  function playSound(type) {
+    if (!soundEnabled || !audioCtx) return;
+    try {
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      if (type === 'shoot_slingshot') {
+        osc.type='sine'; osc.frequency.setValueAtTime(400,now);
+        osc.frequency.exponentialRampToValueAtTime(150,now+0.12);
+        gain.gain.setValueAtTime(0.22,now); gain.gain.linearRampToValueAtTime(0.01,now+0.12);
+        osc.start(now); osc.stop(now+0.12);
+      } else if (type === 'shoot_gun') {
+        osc.type='triangle'; osc.frequency.setValueAtTime(800,now);
+        osc.frequency.exponentialRampToValueAtTime(80,now+0.15);
+        gain.gain.setValueAtTime(0.3,now); gain.gain.linearRampToValueAtTime(0.01,now+0.15);
+        osc.start(now); osc.stop(now+0.15);
+      } else if (type === 'shoot_shotgun') {
+        osc.type='sawtooth'; osc.frequency.setValueAtTime(300,now);
+        osc.frequency.exponentialRampToValueAtTime(40,now+0.3);
+        gain.gain.setValueAtTime(0.42,now); gain.gain.linearRampToValueAtTime(0.01,now+0.3);
+        osc.start(now); osc.stop(now+0.3);
+      } else if (type === 'hit') {
+        osc.type='square'; osc.frequency.setValueAtTime(140,now);
+        osc.frequency.exponentialRampToValueAtTime(60,now+0.08);
+        gain.gain.setValueAtTime(0.25,now); gain.gain.linearRampToValueAtTime(0.01,now+0.08);
+        osc.start(now); osc.stop(now+0.08);
+      } else if (type === 'reload') {
+        osc.type='square'; osc.frequency.setValueAtTime(300,now);
+        osc.frequency.exponentialRampToValueAtTime(600,now+0.08);
+        gain.gain.setValueAtTime(0.12,now); gain.gain.linearRampToValueAtTime(0.01,now+0.1);
+        osc.start(now); osc.stop(now+0.1);
+      } else if (type === 'pickup') {
+        osc.type='sine'; osc.frequency.setValueAtTime(600,now);
+        osc.frequency.linearRampToValueAtTime(900,now+0.08);
+        gain.gain.setValueAtTime(0.15,now); gain.gain.linearRampToValueAtTime(0.01,now+0.12);
+        osc.start(now); osc.stop(now+0.12);
+      } else if (type === 'victory') {
+        [440,554,659,880].forEach((freq,i) => {
+          const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+          o.connect(g); g.connect(audioCtx.destination);
+          o.type='triangle'; o.frequency.value=freq;
+          g.gain.setValueAtTime(0.18,now+i*0.12);
+          g.gain.exponentialRampToValueAtTime(0.001,now+i*0.12+0.3);
+          o.start(now+i*0.12); o.stop(now+i*0.12+0.35);
         });
       }
+    } catch(e) {}
+  }
 
-      weaponBtns.forEach((btn, i) => {
-        btn.addEventListener('click', () => selectWeapon(i));
-      });
+  document.getElementById('btn-sound-toggle').addEventListener('click', () => {
+    soundEnabled = !soundEnabled;
+    const icon = document.getElementById('icon-sound');
+    icon.classList.toggle('text-amber-400', soundEnabled);
+    icon.classList.toggle('text-stone-600', !soundEnabled);
+  });
 
-      // GESTION DU JOYSTICK SUR MOBILE
-      function handleJoystickStart(clientX, clientY) {
-        const rect = joystickZone.getBoundingClientRect();
-        joystick.active = true;
-        joystick.startX = rect.left + rect.width / 2;
-        joystick.startY = rect.top + rect.height / 2;
-        handleJoystickMove(clientX, clientY);
+  // ==================== MAP ====================
+  const MAP_SIZE = 1800;
+  let width = 0, height = 0;
+  function resize() {
+    const rect = container.getBoundingClientRect();
+    width = rect.width; height = rect.height;
+    canvas.width = width; canvas.height = height;
+  }
+  window.addEventListener('resize', resize); resize();
+
+  const buildings = [
+    { x: 300, y: 300, w: 220, h: 180, label: "Dar Casbah Nord" },
+    { x: 700, y: 250, w: 260, h: 200, label: "Souk Artisanal" },
+    { x: 1250, y: 350, w: 280, h: 220, label: "Remparts Kasbah" },
+    { x: 260, y: 800, w: 240, h: 260, label: "Palais des Rais" },
+    { x: 750, y: 750, w: 320, h: 320, label: "Place Centrale" },
+    { x: 1300, y: 850, w: 250, h: 240, label: "Fort Saïd" },
+    { x: 400, y: 1300, w: 260, h: 200, label: "Minaret Bab Jedid" },
+    { x: 900, y: 1350, w: 300, h: 240, label: "Oasis des Palmiers" },
+    { x: 1400, y: 1300, w: 220, h: 280, label: "Entrepôt Saharien" }
+  ];
+
+  // ==================== WEAPONS ====================
+  const WEAPONS = [
+    { name:"El-Gommia", cooldown:280, damage:20, speed:11, spread:0.04, color:"#f59e0b", radius:4, mag:Infinity, magSize:Infinity, reserve:Infinity, sound:'shoot_slingshot', reload:0 },
+    { name:"Pistolet 9mm", cooldown:180, damage:28, speed:15, spread:0.06, color:"#38bdf8", radius:3.5, mag:12, magSize:12, reserve:36, sound:'shoot_gun', reload:1200 },
+    { name:"Makrouf", cooldown:700, damage:55, speed:13, spread:0.22, color:"#fb7185", radius:3, mag:4, magSize:4, reserve:8, pellets:4, sound:'shoot_shotgun', reload:1800 }
+  ];
+
+  // ==================== STATE ====================
+  let gameState = 'MENU';
+  let matchStartTime = 0;
+  let totalDamageDealt = 0;
+  let playerKills = 0;
+  let hitMarkerTimer = 0;
+  let shakeTime = 0;
+  let damageVignette = 0;
+  let bullets = [];
+  let loots = [];
+  let bulletPool = [];
+
+  let player = {
+    x: 900, y: 1050, radius: 16, speed: 4.0,
+    hp: 100, maxHp: 100, angle: 0,
+    activeWeaponIdx: 0, lastShootTime: 0,
+    lastManualAimTime: 0,
+    isDead: false, reloading: false, reloadEndTime: 0
+  };
+
+  let bots = [];
+  const BOT_NAMES = [
+    "Kader_99","Fennec_Dz","Casbah_Ghost","Desert_Eagle","Amine_Algiers",
+    "Redouane_Sniper","Yacine_Dune","Rachid_Pro","Sahara_Fox","Brahim_Tornado",
+    "Bilal_Oran","Sofiane_Storm","Walid_Casbah","Mustapha_31","Farid_Hunter",
+    "Hadj_Tactical","Mehdi_Speed","Zinedine_Striker","Nassim_Casbah","Tarek_Warrior",
+    "SidAli_Blade","Hamza_Rider","Karim_Scout","Omar_Sahil"
+  ];
+
+  let storm = {
+    centerX: 900, centerY: 900,
+    radius: 1200, minRadius: 80,
+    duration: 210, damageTimer: 0
+  };
+
+  // Sand particles
+  const sandParticles = Array.from({ length: 80 }, () => ({
+    x: Math.random() * MAP_SIZE,
+    y: Math.random() * MAP_SIZE,
+    vx: 1.2 + Math.random() * 2.4,
+    vy: (Math.random() - 0.5) * 0.8,
+    a: 0.15 + Math.random() * 0.3
+  }));
+
+  // ==================== JOYSTICK ====================
+  let joystick = { active: false, dx: 0, dy: 0, maxRadius: 40 };
+  const joystickZone = document.getElementById('joystick-zone');
+  const joystickKnob = document.getElementById('joystick-knob');
+  let joystickStartX = 0, joystickStartY = 0;
+
+  function handleJoystickStart(cx, cy) {
+    const rect = joystickZone.getBoundingClientRect();
+    joystick.active = true;
+    joystickStartX = rect.left + rect.width / 2;
+    joystickStartY = rect.top + rect.height / 2;
+    handleJoystickMove(cx, cy);
+  }
+  function handleJoystickMove(cx, cy) {
+    if (!joystick.active) return;
+    let dx = cx - joystickStartX, dy = cy - joystickStartY;
+    let dist = Math.hypot(dx, dy);
+    if (dist > joystick.maxRadius) {
+      dx = (dx / dist) * joystick.maxRadius;
+      dy = (dy / dist) * joystick.maxRadius;
+    }
+    joystick.dx = dx / joystick.maxRadius;
+    joystick.dy = dy / joystick.maxRadius;
+    joystickKnob.style.transform = `translate(${dx}px, ${dy}px)`;
+  }
+  function handleJoystickEnd() {
+    joystick.active = false; joystick.dx = 0; joystick.dy = 0;
+    joystickKnob.style.transform = `translate(0px, 0px)`;
+  }
+  joystickZone.addEventListener('pointerdown', (e) => {
+    initAudio(); handleJoystickStart(e.clientX, e.clientY);
+    joystickZone.setPointerCapture(e.pointerId);
+  });
+  joystickZone.addEventListener('pointermove', (e) => {
+    if (joystick.active) handleJoystickMove(e.clientX, e.clientY);
+  });
+  joystickZone.addEventListener('pointerup', handleJoystickEnd);
+  joystickZone.addEventListener('pointercancel', handleJoystickEnd);
+
+  // ==================== SHOOT BUTTON (TAP + DRAG-AIM) ====================
+  let shootInterval = null;
+  let aimDragging = false;
+  let aimStartX = 0, aimStartY = 0;
+  let aimDx = 0, aimDy = 0;
+
+  btnShoot.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    initAudio();
+    aimDragging = true;
+    aimDx = 0; aimDy = 0;
+    const rect = btnShoot.getBoundingClientRect();
+    aimStartX = rect.left + rect.width / 2;
+    aimStartY = rect.top + rect.height / 2;
+    tryShoot();
+    if (!shootInterval) shootInterval = setInterval(tryShoot, 120);
+    btnShoot.setPointerCapture(e.pointerId);
+  });
+  btnShoot.addEventListener('pointermove', (e) => {
+    if (!aimDragging) return;
+    const dx = e.clientX - aimStartX;
+    const dy = e.clientY - aimStartY;
+    if (Math.hypot(dx, dy) > 12) {
+      aimDx = dx; aimDy = dy;
+      player.angle = Math.atan2(dy, dx);
+      player.lastManualAimTime = Date.now();
+    }
+  });
+  function stopShoot() {
+    aimDragging = false;
+    if (shootInterval) { clearInterval(shootInterval); shootInterval = null; }
+  }
+  btnShoot.addEventListener('pointerup', stopShoot);
+  btnShoot.addEventListener('pointercancel', stopShoot);
+  window.addEventListener('pointerup', stopShoot);
+
+  // ==================== CANVAS TAP (AIM + FIRE) ====================
+  canvas.addEventListener('pointerdown', (e) => {
+    if (gameState !== 'PLAYING') return;
+    initAudio();
+    const rect = canvas.getBoundingClientRect();
+    const cx = e.clientX - rect.left;
+    const cy = e.clientY - rect.top;
+    player.angle = Math.atan2(cy - height / 2, cx - width / 2);
+    player.lastManualAimTime = Date.now();
+    tryShoot();
+  });
+
+  // ==================== KEYBOARD ====================
+  const keys = {};
+  window.addEventListener('keydown', (e) => {
+    keys[e.key.toLowerCase()] = true;
+    if (e.key === '1') selectWeapon(0);
+    if (e.key === '2') selectWeapon(1);
+    if (e.key === '3') selectWeapon(2);
+    if (e.key === ' ' || e.code === 'Space') { e.preventDefault(); tryShoot(); }
+    if (e.key.toLowerCase() === 'r') startReload();
+  });
+  window.addEventListener('keyup', (e) => { keys[e.key.toLowerCase()] = false; });
+
+  // Mouse aim (twin-stick desktop)
+  canvas.addEventListener('mousemove', (e) => {
+    if (gameState !== 'PLAYING') return;
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    player.angle = Math.atan2(my - height / 2, mx - width / 2);
+    player.lastManualAimTime = Date.now();
+  });
+
+  // ==================== WEAPONS SELECT ====================
+  function selectWeapon(idx, force = false) {
+    if (!force && player.activeWeaponIdx === idx) return;
+    if (player.reloading && player.activeWeaponIdx !== idx) player.reloading = false;
+    player.activeWeaponIdx = idx;
+    weaponBtns.forEach((btn, i) => {
+      if (i === idx) {
+        btn.classList.add('border-amber-500','bg-amber-500/10','opacity-100');
+        btn.classList.remove('border-stone-800/80','opacity-60');
+      } else {
+        btn.classList.remove('border-amber-500','bg-amber-500/10','opacity-100');
+        btn.classList.add('border-stone-800/80','opacity-60');
       }
+    });
+    updateAmmoDisplay();
+  }
+  weaponBtns.forEach((btn, i) => btn.addEventListener('click', () => selectWeapon(i)));
 
-      function handleJoystickMove(clientX, clientY) {
-        if (!joystick.active) return;
-        let diffX = clientX - joystick.startX;
-        let diffY = clientY - joystick.startY;
-        let dist = Math.sqrt(diffX * diffX + diffY * diffY);
-
-        if (dist > joystick.maxRadius) {
-          diffX = (diffX / dist) * joystick.maxRadius;
-          diffY = (diffY / dist) * joystick.maxRadius;
-          dist = joystick.maxRadius;
-        }
-
-        joystick.dx = diffX / joystick.maxRadius;
-        joystick.dy = diffY / joystick.maxRadius;
-
-        joystickKnob.style.transform = `translate(${diffX}px, ${diffY}px)`;
+  function updateAmmoDisplay() {
+    for (let i = 1; i <= 2; i++) {
+      const w = WEAPONS[i];
+      const el = weaponAmmoTexts[i];
+      if (!el) continue;
+      if (player.activeWeaponIdx === i && player.reloading) {
+        el.innerText = "RECHARGE...";
+        el.className = "text-[11px] font-mono font-extrabold text-amber-400 mt-0.5 animate-pulse";
+      } else {
+        el.innerText = `${w.mag}/${w.reserve}`;
+        el.className = "text-[11px] font-mono font-extrabold text-stone-300 mt-0.5";
       }
+    }
+  }
 
-      function handleJoystickEnd() {
-        joystick.active = false;
-        joystick.dx = 0;
-        joystick.dy = 0;
-        joystickKnob.style.transform = `translate(0px, 0px)`;
+  function startReload() {
+    const w = WEAPONS[player.activeWeaponIdx];
+    if (w.mag === Infinity || player.reloading) return;
+    if (w.reserve <= 0 || w.mag >= w.magSize) return;
+    player.reloading = true;
+    player.reloadEndTime = Date.now() + w.reload;
+    playSound('reload');
+    updateAmmoDisplay();
+  }
+
+  function tryShoot() {
+    if (gameState !== 'PLAYING' || player.isDead || player.reloading) return;
+    const now = Date.now();
+    const weapon = WEAPONS[player.activeWeaponIdx];
+    if (now - player.lastShootTime < weapon.cooldown) return;
+
+    if (weapon.mag !== Infinity && weapon.mag <= 0) {
+      if (weapon.reserve > 0) startReload();
+      return;
+    }
+    player.lastShootTime = now;
+    if (weapon.mag !== Infinity) weapon.mag--;
+    playSound(weapon.sound);
+
+    const count = weapon.pellets || 1;
+    for (let i = 0; i < count; i++) {
+      const a = player.angle + (Math.random() - 0.5) * weapon.spread;
+      bullets.push({
+        x: player.x + Math.cos(player.angle) * 20,
+        y: player.y + Math.sin(player.angle) * 20,
+        vx: Math.cos(a) * weapon.speed,
+        vy: Math.sin(a) * weapon.speed,
+        damage: weapon.damage / count,
+        rangeLeft: 580,
+        color: weapon.color, radius: weapon.radius,
+        owner: 'player'
+      });
+    }
+    updateAmmoDisplay();
+  }
+
+  // ==================== ALERT & KILL FEED ====================
+  function showAlert(text) {
+    gameFeedText.innerText = text;
+    gameFeed.classList.remove('opacity-0','-translate-y-2');
+    gameFeed.classList.add('opacity-100','translate-y-0');
+    clearTimeout(gameFeed._timer);
+    gameFeed._timer = setTimeout(() => {
+      gameFeed.classList.remove('opacity-100','translate-y-0');
+      gameFeed.classList.add('opacity-0','-translate-y-2');
+    }, 2800);
+  }
+
+  const killFeedQueue = [];
+  function pushFeed(text, icon = '💀', isPlayer = false) {
+    const entry = document.createElement('div');
+    entry.style.cssText = `background:rgba(18,13,10,0.88);border:1px solid ${isPlayer?'rgba(250,204,21,0.5)':'rgba(120,113,108,0.4)'};border-radius:8px;padding:4px 10px;font-size:11px;font-weight:600;color:${isPlayer?'#fde047':'#e7e5e4'};white-space:nowrap;`;
+    entry.textContent = `${icon} ${text}`;
+    killFeedEl.appendChild(entry);
+    killFeedQueue.push({ el: entry, until: Date.now() + 3500 });
+    while (killFeedQueue.length > 4) {
+      const old = killFeedQueue.shift();
+      old.el.remove();
+    }
+  }
+  setInterval(() => {
+    const now = Date.now();
+    while (killFeedQueue.length && killFeedQueue[0].until < now) {
+      killFeedQueue.shift().el.remove();
+    }
+  }, 400);
+
+  function dropLoot(x, y, type) {
+    loots.push({ x, y, type, radius: 14, born: Date.now() });
+  }
+
+  // ==================== MATCH START ====================
+  function startMatch() {
+    initAudio();
+    gameState = 'PLAYING';
+    matchStartTime = Date.now();
+    totalDamageDealt = 0;
+    playerKills = 0;
+    hitMarkerTimer = 0; shakeTime = 0; damageVignette = 0;
+
+    player.x = 900; player.y = 1050; player.hp = 100; player.isDead = false;
+    player.angle = 0; player.activeWeaponIdx = 0; player.reloading = false;
+    player.lastManualAimTime = 0;
+
+    WEAPONS[1].mag = 12; WEAPONS[1].reserve = 36;
+    WEAPONS[2].mag = 4; WEAPONS[2].reserve = 8;
+    selectWeapon(0, true);
+
+    bullets = []; loots = []; bulletPool = [];
+    killFeedQueue.length = 0; killFeedEl.innerHTML = '';
+    storm.radius = 1100; storm.centerX = 900; storm.centerY = 900; storm.damageTimer = 0;
+
+    bots = [];
+    for (let i = 0; i < 24; i++) {
+      const angle = (i / 24) * Math.PI * 2;
+      const dist = 350 + Math.random() * 550;
+      let bx, by, tries = 0;
+      do {
+        bx = 900 + Math.cos(angle) * (dist + tries * 20);
+        by = 900 + Math.sin(angle) * (dist + tries * 20);
+        tries++;
+      } while (checkBuildingCollision(bx, by, 16) && tries < 25);
+      bots.push({
+        id: i, name: BOT_NAMES[i % BOT_NAMES.length],
+        x: bx, y: by, radius: 16, hp: 60,
+        speed: 2.4 + Math.random() * 0.9,
+        angle: Math.random() * Math.PI * 2,
+        changeDirTimer: Math.random() * 60,
+        shootCooldown: 60 + Math.random() * 120,
+        alive: true, lastX: bx, lastY: by, stuckTime: 0
+      });
+    }
+
+    screenMenu.classList.add('opacity-0', 'pointer-events-none');
+    setTimeout(() => screenMenu.classList.add('hidden'), 500);
+    screenGameOver.classList.add('hidden');
+    updateHUD();
+    updateAmmoDisplay();
+    showAlert("Match commencé ! 25 joueurs, un seul survivant.");
+  }
+  btnStartGame.addEventListener('click', startMatch);
+  btnRestart.addEventListener('click', startMatch);
+  btnBackMenu.addEventListener('click', () => {
+    screenGameOver.classList.add('hidden');
+    screenMenu.classList.remove('hidden','opacity-0','pointer-events-none');
+    gameState = 'MENU';
+  });
+
+  function updateHUD() {
+    const aliveBots = bots.filter(b => b.alive).length;
+    const totalAlive = (player.isDead ? 0 : 1) + aliveBots;
+    hudAlive.innerText = totalAlive;
+    hudKills.innerText = playerKills;
+    const ratio = Math.max(0, player.hp / player.maxHp);
+    hudHpVal.innerText = `${Math.ceil(player.hp)} / ${player.maxHp}`;
+    hudHpBar.style.width = `${ratio * 100}%`;
+    hudHpBar.className = ratio < 0.3
+      ? "h-full bg-gradient-to-r from-rose-600 to-red-500 rounded-full transition-all duration-200 animate-pulse"
+      : "h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-200";
+    if (gameState === 'PLAYING') {
+      const elapsed = (Date.now() - matchStartTime) / 1000;
+      const left = Math.max(0, storm.duration - elapsed);
+      const m = Math.floor(left / 60), s = Math.floor(left % 60);
+      hudStormTimer.innerText = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }
+  }
+
+  function checkBuildingCollision(x, y, r) {
+    for (const b of buildings) {
+      if (x + r > b.x && x - r < b.x + b.w && y + r > b.y && y - r < b.y + b.h) return true;
+    }
+    return false;
+  }
+
+  function checkGameOver() {
+    const aliveBots = bots.filter(b => b.alive).length;
+    if (player.isDead) triggerGameOver(false, aliveBots + 1);
+    else if (aliveBots === 0) triggerGameOver(true, 1);
+  }
+
+  function triggerGameOver(isVictory, rank) {
+    gameState = 'GAMEOVER';
+    const elapsed = Math.floor((Date.now() - matchStartTime) / 1000);
+    const m = Math.floor(elapsed / 60), s = elapsed % 60;
+    const timeStr = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+
+    const badge = document.getElementById('gameover-badge');
+    const title = document.getElementById('gameover-title');
+    const sub = document.getElementById('gameover-subtitle');
+
+    if (isVictory) {
+      playSound('victory');
+      badge.innerText = '🏆';
+      badge.className = "w-20 h-20 rounded-full flex items-center justify-center text-4xl shadow-2xl mb-3 border-2 border-amber-400 bg-amber-500/20 text-amber-300";
+      title.innerText = "مبروك ! المرتبة الأولى";
+      sub.innerText = "! TOP 1 ! MABROUK !";
+      title.className = "text-3xl font-black text-amber-400 font-arabic";
+    } else {
+      badge.innerText = '💀';
+      badge.className = "w-20 h-20 rounded-full flex items-center justify-center text-4xl shadow-2xl mb-3 border-2 border-rose-500 bg-rose-500/20 text-rose-300";
+      title.innerText = "تم إقصاؤك";
+      sub.innerText = `ÉLIMINÉ • RANG #${rank}`;
+      title.className = "text-3xl font-black text-rose-400 font-arabic";
+    }
+    document.getElementById('gameover-rank').innerText = `#${rank}`;
+    document.getElementById('gameover-kills').innerText = playerKills;
+    document.getElementById('gameover-time').innerText = timeStr;
+    document.getElementById('gameover-damage').innerText = `${Math.ceil(totalDamageDealt)} pts`;
+    screenGameOver.classList.remove('hidden');
+  }
+
+  // ==================== AI TARGET ====================
+  function findNearestTarget(bot) {
+    let best = null, bestD = Infinity;
+    if (!player.isDead) {
+      const d = Math.hypot(player.x - bot.x, player.y - bot.y);
+      if (d < 220) { bestD = d * 0.8; best = player; }
+    }
+    for (const other of bots) {
+      if (!other.alive || other === bot) continue;
+      const d = Math.hypot(other.x - bot.x, other.y - bot.y);
+      if (d < bestD && d < 180) { bestD = d; best = other; }
+    }
+    return best;
+  }
+
+  function killBot(bot, killerName, isPlayerKill) {
+    bot.alive = false;
+    if (isPlayerKill) {
+      playerKills++;
+      pushFeed(`Toi → ${bot.name}`, '💀', true);
+      if (Math.random() < 0.7) {
+        dropLoot(bot.x, bot.y, Math.random() < 0.55 ? 'ammo' : 'hp');
       }
+    } else {
+      pushFeed(`${killerName} → ${bot.name}`, '⚔️');
+    }
+    checkGameOver();
+  }
 
-      joystickZone.addEventListener('pointerdown', (e) => {
-        initAudio();
-        handleJoystickStart(e.clientX, e.clientY);
-        joystickZone.setPointerCapture(e.pointerId);
-      });
-      joystickZone.addEventListener('pointermove', (e) => {
-        if (joystick.active) handleJoystickMove(e.clientX, e.clientY);
-      });
-      joystickZone.addEventListener('pointerup', handleJoystickEnd);
-      joystickZone.addEventListener('pointercancel', handleJoystickEnd);
+  // ==================== UPDATE ====================
+  function update(dt) {
+    if (gameState !== 'PLAYING') return;
 
-      // BOUTON DE TIR TACTILE
-      let shootInterval = null;
-      btnShoot.addEventListener('pointerdown', (e) => {
-        initAudio();
-        tryShoot();
-        if (!shootInterval) {
-          shootInterval = setInterval(tryShoot, 150);
-        }
-      });
-      const stopShoot = () => {
-        if (shootInterval) {
-          clearInterval(shootInterval);
-          shootInterval = null;
-        }
-      };
-      btnShoot.addEventListener('pointerup', stopShoot);
-      btnShoot.addEventListener('pointercancel', stopShoot);
-      window.addEventListener('pointerup', stopShoot);
+    // Storm
+    const elapsed = (Date.now() - matchStartTime) / 1000;
+    const progress = Math.min(1, elapsed / storm.duration);
+    storm.radius = 1100 - (1100 - storm.minRadius) * progress;
 
-      // TIRER EN CLIC DIRECT SUR CANVAS (VISER OÙ ON CLIQUE)
-      canvas.addEventListener('pointerdown', (e) => {
-        if (gameState !== 'PLAYING') return;
-        initAudio();
-        const rect = canvas.getBoundingClientRect();
-        const clickX = e.clientX - rect.left;
-        const clickY = e.clientY - rect.top;
-        
-        // Calculer l'angle vers la cible
-        const screenCenterX = width / 2;
-        const screenCenterY = height / 2;
-        player.angle = Math.atan2(clickY - screenCenterY, clickX - screenCenterX);
-        
-        tryShoot();
-      });
-
-      function tryShoot() {
-        if (gameState !== 'PLAYING' || player.isDead) return;
-        const now = Date.now();
-        const weapon = WEAPONS[player.activeWeaponIdx];
-
-        if (now - player.lastShootTime < weapon.cooldown) return;
-        if (weapon.ammo !== Infinity && weapon.ammo <= 0) {
-          showNotification("Munitions épuisées pour cette arme !");
-          return;
-        }
-
-        player.lastShootTime = now;
-        if (weapon.ammo !== Infinity) {
-          weapon.ammo--;
-          if (weaponAmmoTexts[player.activeWeaponIdx]) {
-            weaponAmmoTexts[player.activeWeaponIdx].innerText = weapon.ammo + " balles";
+    storm.damageTimer += dt;
+    if (storm.damageTimer >= 45) {
+      storm.damageTimer = 0;
+      if (!player.isDead) {
+        const d = Math.hypot(player.x - storm.centerX, player.y - storm.centerY);
+        if (d > storm.radius) {
+          player.hp -= 4;
+          damageVignette = Math.max(damageVignette, 0.6);
+          playSound('hit');
+          if (player.hp <= 0) {
+            player.hp = 0; player.isDead = true;
+            checkGameOver();
+            if (gameState !== 'PLAYING') return;
           }
         }
+      }
+      bots.forEach(b => {
+        if (!b.alive) return;
+        const bd = Math.hypot(b.x - storm.centerX, b.y - storm.centerY);
+        if (bd > storm.radius) {
+          b.hp -= 6;
+          if (b.hp <= 0) killBot(b, 'Tempête', false);
+        }
+      });
+    }
 
-        playSound(weapon.sound);
+    // Reload
+    if (player.reloading && Date.now() >= player.reloadEndTime) {
+      const w = WEAPONS[player.activeWeaponIdx];
+      const need = w.magSize - w.mag;
+      const load = Math.min(need, w.reserve);
+      w.mag += load; w.reserve -= load;
+      player.reloading = false;
+      updateAmmoDisplay();
+    }
 
-        // Instanciation des balles (gère les plombs du fusil Makrouf)
-        const count = weapon.pellets || 1;
-        for (let i = 0; i < count; i++) {
-          const spreadAngle = player.angle + (Math.random() - 0.5) * weapon.spread;
+    // Movement input
+    let mx = 0, my = 0;
+    if (keys['z'] || keys['w'] || keys['arrowup']) my -= 1;
+    if (keys['s'] || keys['arrowdown']) my += 1;
+    if (keys['q'] || keys['a'] || keys['arrowleft']) mx -= 1;
+    if (keys['d'] || keys['arrowright']) mx += 1;
+    if (joystick.active) { mx = joystick.dx; my = joystick.dy; }
+
+    const len = Math.hypot(mx, my);
+    if (len > 0.05 && !player.isDead) {
+      const nx = mx / len, ny = my / len;
+      if (!aimDragging && Date.now() - player.lastManualAimTime > 1000) {
+        player.angle = Math.atan2(ny, nx);
+      }
+      const newX = player.x + nx * player.speed * dt;
+      const newY = player.y + ny * player.speed * dt;
+      if (!checkBuildingCollision(newX, player.y, player.radius) && newX > 20 && newX < MAP_SIZE - 20) player.x = newX;
+      if (!checkBuildingCollision(player.x, newY, player.radius) && newY > 20 && newY < MAP_SIZE - 20) player.y = newY;
+    }
+
+    // Loot pickup
+    for (let i = loots.length - 1; i >= 0; i--) {
+      const l = loots[i];
+      if (Math.hypot(l.x - player.x, l.y - player.y) < player.radius + l.radius) {
+        if (l.type === 'ammo') {
+          WEAPONS[1].reserve += 12;
+          WEAPONS[2].reserve += 2;
+          pushFeed('+12 balles 9mm, +2 cartouches', '📦', true);
+        } else {
+          player.hp = Math.min(player.maxHp, player.hp + 25);
+          pushFeed('+25 PV', '💊', true);
+        }
+        playSound('pickup');
+        updateAmmoDisplay();
+        loots.splice(i, 1);
+      }
+    }
+
+    // Bots AI
+    bots.forEach(bot => {
+      if (!bot.alive) return;
+      bot.changeDirTimer -= dt;
+      if (bot.changeDirTimer <= 0) {
+        bot.changeDirTimer = 60 + Math.random() * 80;
+        const dStorm = Math.hypot(bot.x - storm.centerX, bot.y - storm.centerY);
+        if (dStorm > storm.radius - 80) {
+          bot.angle = Math.atan2(storm.centerY - bot.y, storm.centerX - bot.x);
+        } else {
+          bot.angle += (Math.random() - 0.5) * 1.5;
+        }
+      }
+
+      // Anti-stuck
+      const moved = Math.hypot(bot.x - bot.lastX, bot.y - bot.lastY);
+      if (moved < 0.5) bot.stuckTime += dt;
+      else bot.stuckTime = 0;
+      bot.lastX = bot.x; bot.lastY = bot.y;
+      if (bot.stuckTime > 60) {
+        bot.angle += Math.PI * (0.5 + Math.random());
+        bot.stuckTime = 0;
+      }
+
+      const bnx = bot.x + Math.cos(bot.angle) * bot.speed * dt;
+      const bny = bot.y + Math.sin(bot.angle) * bot.speed * dt;
+      if (!checkBuildingCollision(bnx, bny, bot.radius) && bnx > 40 && bnx < MAP_SIZE - 40 && bny > 40 && bny < MAP_SIZE - 40) {
+        bot.x = bnx; bot.y = bny;
+      } else {
+        bot.angle += Math.PI * (0.6 + Math.random() * 0.4);
+      }
+
+      // Shoot
+      bot.shootCooldown -= dt;
+      if (bot.shootCooldown <= 0) {
+        const target = findNearestTarget(bot);
+        if (target) {
+          bot.shootCooldown = 90 + Math.random() * 80;
+          const a = Math.atan2(target.y - bot.y, target.x - bot.x) + (Math.random() - 0.5) * 0.2;
           bullets.push({
-            x: player.x + Math.cos(player.angle) * 20,
-            y: player.y + Math.sin(player.angle) * 20,
-            vx: Math.cos(spreadAngle) * weapon.speed,
-            vy: Math.sin(spreadAngle) * weapon.speed,
-            damage: weapon.damage / count,
-            rangeLeft: 580,
-            color: weapon.color,
-            radius: weapon.radius,
-            owner: 'player'
+            x: bot.x + Math.cos(a) * 18, y: bot.y + Math.sin(a) * 18,
+            vx: Math.cos(a) * 9.5, vy: Math.sin(a) * 9.5,
+            damage: 12, rangeLeft: 380,
+            color: '#f87171', radius: 3,
+            owner: 'bot', ownerRef: bot
           });
         }
       }
+    });
 
-      function showNotification(text) {
-        gameFeedText.innerText = text;
-        gameFeed.classList.remove('opacity-0', '-translate-y-2');
-        gameFeed.classList.add('opacity-100', 'translate-y-0');
-        clearTimeout(gameFeed._timer);
-        gameFeed._timer = setTimeout(() => {
-          gameFeed.classList.remove('opacity-100', 'translate-y-0');
-          gameFeed.classList.add('opacity-0', '-translate-y-2');
-        }, 3200);
+    // Bullet physics
+    for (let i = bullets.length - 1; i >= 0; i--) {
+      const b = bullets[i];
+      b.x += b.vx * dt;
+      b.y += b.vy * dt;
+      b.rangeLeft -= Math.hypot(b.vx, b.vy) * dt;
+
+      if (checkBuildingCollision(b.x, b.y, b.radius) || b.rangeLeft <= 0) {
+        bullets.splice(i, 1); continue;
       }
 
-      // INITIALISATION DU MATCH
-      function startMatch() {
-        initAudio();
-        gameState = 'PLAYING';
-        matchStartTime = Date.now();
-        totalDamageDealt = 0;
-        playerKills = 0;
-
-        player.x = 900;
-        player.y = 1050;
-        player.hp = 100;
-        player.isDead = false;
-        player.angle = 0;
-        player.activeWeaponIdx = 0;
-        WEAPONS[1].ammo = 24;
-        WEAPONS[2].ammo = 8;
-        if (weaponAmmoTexts[1]) weaponAmmoTexts[1].innerText = "24 balles";
-        if (weaponAmmoTexts[2]) weaponAmmoTexts[2].innerText = "8 cart.";
-        selectWeapon(0);
-
-        bullets = [];
-        storm.radius = 1100;
-        storm.centerX = 900;
-        storm.centerY = 900;
-
-        // Générer 24 bots répartis sur la carte
-        bots = [];
-        for (let i = 0; i < 24; i++) {
-          const angle = (i / 24) * Math.PI * 2;
-          const dist = 350 + Math.random() * 550;
-          bots.push({
-            id: i,
-            name: BOT_NAMES[i % BOT_NAMES.length],
-            x: 900 + Math.cos(angle) * dist,
-            y: 900 + Math.sin(angle) * dist,
-            radius: 16,
-            hp: 60,
-            speed: 2.4 + Math.random() * 0.9,
-            angle: Math.random() * Math.PI * 2,
-            targetX: 900,
-            targetY: 900,
-            changeDirTimer: Math.random() * 60,
-            shootCooldown: 60 + Math.random() * 120,
-            alive: true,
-            color: '#a8a29e'
-          });
-        }
-
-        screenMenu.classList.add('opacity-0', 'pointer-events-none');
-        setTimeout(() => screenMenu.classList.add('hidden'), 500);
-        screenGameOver.classList.add('hidden');
-
-        updateHUD();
-        showNotification("Match commencé ! 1 Joueur vs 24 Bots");
-      }
-
-      btnStartGame.addEventListener('click', startMatch);
-      btnRestart.addEventListener('click', startMatch);
-      btnBackMenu.addEventListener('click', () => {
-        screenGameOver.classList.add('hidden');
-        screenMenu.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
-        gameState = 'MENU';
-      });
-
-      // MISE À JOUR DE L'AFFICHAGE DU HUD
-      function updateHUD() {
-        const aliveBots = bots.filter(b => b.alive).length;
-        const totalAlive = (player.isDead ? 0 : 1) + aliveBots;
-        hudAlive.innerText = totalAlive;
-        hudKills.innerText = playerKills;
-
-        const hpRatio = Math.max(0, player.hp / player.maxHp);
-        hudHpVal.innerText = `${Math.ceil(player.hp)} / ${player.maxHp}`;
-        hudHpBar.style.width = `${hpRatio * 100}%`;
-        if (hpRatio < 0.3) {
-          hudHpBar.className = "h-full bg-gradient-to-r from-rose-600 to-red-500 rounded-full transition-all duration-200 animate-pulse";
-        } else {
-          hudHpBar.className = "h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-200";
-        }
-
-        // Chronomètre Tempête
-        if (gameState === 'PLAYING') {
-          const elapsed = (Date.now() - matchStartTime) / 1000;
-          const timeLeft = Math.max(0, storm.duration - elapsed);
-          const mins = Math.floor(timeLeft / 60);
-          const secs = Math.floor(timeLeft % 60);
-          hudStormTimer.innerText = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-        }
-      }
-
-      // COLLISION AVEC BÂTIMENTS
-      function checkBuildingCollision(x, y, radius) {
-        for (let b of buildings) {
-          if (x + radius > b.x && x - radius < b.x + b.w &&
-              y + radius > b.y && y - radius < b.y + b.h) {
-            return true;
-          }
-        }
-        return false;
-      }
-
-      // VÉRIFICATION FIN DE MATCH
-      function checkGameOver() {
-        const aliveBots = bots.filter(b => b.alive).length;
-        if (player.isDead) {
-          triggerGameOver(false, aliveBots + 1);
-        } else if (aliveBots === 0) {
-          triggerGameOver(true, 1);
-        }
-      }
-
-      function triggerGameOver(isVictory, rank) {
-        gameState = 'GAMEOVER';
-        const elapsedSecs = Math.floor((Date.now() - matchStartTime) / 1000);
-        const mins = Math.floor(elapsedSecs / 60);
-        const secs = elapsedSecs % 60;
-        const timeStr = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-
-        const badge = document.getElementById('gameover-badge');
-        const title = document.getElementById('gameover-title');
-        const subtitle = document.getElementById('gameover-subtitle');
-
-        if (isVictory) {
-          playSound('victory');
-          badge.innerText = '🏆';
-          badge.className = "w-20 h-20 rounded-full flex items-center justify-center text-4xl shadow-2xl mb-3 border-2 border-amber-400 bg-amber-500/20 text-amber-300";
-          title.innerText = "مبروك ! المرتبة الأولى";
-          subtitle.innerText = "! TOP 1 ! MABROUK !";
-          title.className = "text-3xl font-black text-amber-400 font-arabic";
-        } else {
-          badge.innerText = '💀';
-          badge.className = "w-20 h-20 rounded-full flex items-center justify-center text-4xl shadow-2xl mb-3 border-2 border-rose-500 bg-rose-500/20 text-rose-300";
-          title.innerText = "تم إقصاؤك في المعركة";
-          subtitle.innerText = `ÉLIMINÉ • RANG #${rank}`;
-          title.className = "text-3xl font-black text-rose-400 font-arabic";
-        }
-
-        document.getElementById('gameover-rank').innerText = `#${rank}`;
-        document.getElementById('gameover-kills').innerText = playerKills;
-        document.getElementById('gameover-time').innerText = timeStr;
-        document.getElementById('gameover-damage').innerText = `${Math.ceil(totalDamageDealt)} pts`;
-
-        screenGameOver.classList.remove('hidden');
-      }
-
-      // BOUCLE PHYSIQUE DU JEU (60 FPS)
-      function update() {
-        if (gameState !== 'PLAYING') return;
-
-        // 1. Rétrécissement continu de la tempête (Chhili)
-        const elapsed = (Date.now() - matchStartTime) / 1000;
-        const stormProgress = Math.min(1.0, elapsed / storm.duration);
-        storm.radius = 1100 - (1100 - storm.minRadius) * stormProgress;
-
-        // Dégâts de tempête réguliers
-        storm.damageTimer += 1;
-        if (storm.damageTimer >= 45) { // Toutes les 0.75s
-          storm.damageTimer = 0;
-          const distToCenter = Math.hypot(player.x - storm.centerX, player.y - storm.centerY);
-          if (distToCenter > storm.radius) {
-            player.hp -= 4;
+      // Player bullet → bots
+      if (b.owner === 'player') {
+        let hit = false;
+        for (const bot of bots) {
+          if (!bot.alive) continue;
+          if (Math.hypot(bot.x - b.x, bot.y - b.y) < bot.radius + b.radius) {
+            bot.hp -= b.damage;
+            totalDamageDealt += b.damage;
+            hitMarkerTimer = 10;
             playSound('hit');
-            if (player.hp <= 0) {
-              player.hp = 0;
-              player.isDead = true;
-              checkGameOver();
-            }
-          }
-          // Dégâts aux bots dans la tempête
-          bots.forEach(b => {
-            if (!b.alive) return;
-            const bDist = Math.hypot(b.x - storm.centerX, b.y - storm.centerY);
-            if (bDist > storm.radius) {
-              b.hp -= 6;
-              if (b.hp <= 0) b.alive = false;
-            }
-          });
-        }
-
-        // 2. Déplacement du Joueur (Clavier ou Joystick)
-        let moveX = 0;
-        let moveY = 0;
-
-        if (keys['z'] || keys['w'] || keys['arrowup']) moveY -= 1;
-        if (keys['s'] || keys['arrowdown']) moveY += 1;
-        if (keys['q'] || keys['a'] || keys['arrowleft']) moveX -= 1;
-        if (keys['d'] || keys['arrowright']) moveX += 1;
-
-        if (joystick.active) {
-          moveX = joystick.dx;
-          moveY = joystick.dy;
-        }
-
-        const len = Math.hypot(moveX, moveY);
-        if (len > 0.05) {
-          const normX = (moveX / len);
-          const normY = (moveY / len);
-          player.angle = Math.atan2(normY, normX);
-
-          const newX = player.x + normX * player.speed;
-          const newY = player.y + normY * player.speed;
-
-          if (!checkBuildingCollision(newX, player.y, player.radius) && newX > 20 && newX < MAP_SIZE - 20) {
-            player.x = newX;
-          }
-          if (!checkBuildingCollision(player.x, newY, player.radius) && newY > 20 && newY < MAP_SIZE - 20) {
-            player.y = newY;
+            if (bot.hp <= 0) killBot(bot, 'Toi', true);
+            bullets.splice(i, 1); hit = true; break;
           }
         }
-
-        // 3. IA DES BOTS
-        bots.forEach(bot => {
-          if (!bot.alive) return;
-
-          bot.changeDirTimer--;
-          if (bot.changeDirTimer <= 0) {
-            bot.changeDirTimer = 60 + Math.random() * 80;
-            // Si hors tempête, viser le centre
-            const distStorm = Math.hypot(bot.x - storm.centerX, bot.y - storm.centerY);
-            if (distStorm > storm.radius - 80) {
-              const toCenterAngle = Math.atan2(storm.centerY - bot.y, storm.centerX - bot.x);
-              bot.angle = toCenterAngle;
-            } else {
-              bot.angle += (Math.random() - 0.5) * 1.5;
-            }
-          }
-
-          // Déplacement du bot
-          const bx = bot.x + Math.cos(bot.angle) * bot.speed;
-          const by = bot.y + Math.sin(bot.angle) * bot.speed;
-          if (!checkBuildingCollision(bx, by, bot.radius) && bx > 40 && bx < MAP_SIZE - 40 && by > 40 && by < MAP_SIZE - 40) {
-            bot.x = bx;
-            bot.y = by;
-          } else {
-            bot.angle += Math.PI * 0.7;
-          }
-
-          // Tir du bot s'il aperçoit le joueur
-          if (!player.isDead) {
-            const distToPlayer = Math.hypot(player.x - bot.x, player.y - bot.y);
-            if (distToPlayer < 240) {
-              bot.shootCooldown--;
-              if (bot.shootCooldown <= 0) {
-                bot.shootCooldown = 90 + Math.random() * 80;
-                const shootAngle = Math.atan2(player.y - bot.y, player.x - bot.x) + (Math.random() - 0.5) * 0.2;
-                bullets.push({
-                  x: bot.x + Math.cos(shootAngle) * 18,
-                  y: bot.y + Math.sin(shootAngle) * 18,
-                  vx: Math.cos(shootAngle) * 9.5,
-                  vy: Math.sin(shootAngle) * 9.5,
-                  damage: 12,
-                  rangeLeft: 380,
-                  color: '#f87171',
-                  radius: 3,
-                  owner: 'bot'
-                });
-              }
-            }
-          }
-        });
-
-        // 4. BALLES PHYSIQUE ET COLLISIONS
-        for (let i = bullets.length - 1; i >= 0; i--) {
-          const b = bullets[i];
-          b.x += b.vx;
-          b.y += b.vy;
-          b.rangeLeft -= Math.hypot(b.vx, b.vy);
-
-          // Mur collision
-          if (checkBuildingCollision(b.x, b.y, b.radius) || b.rangeLeft <= 0) {
-            bullets.splice(i, 1);
-            continue;
-          }
-
-          // Touche joueur ?
-          if (b.owner === 'bot' && !player.isDead) {
-            const d = Math.hypot(player.x - b.x, player.y - b.y);
-            if (d < player.radius + b.radius) {
-              player.hp -= b.damage;
-              playSound('hit');
-              bullets.splice(i, 1);
-              if (player.hp <= 0) {
-                player.hp = 0;
-                player.isDead = true;
-                checkGameOver();
-              }
-              continue;
-            }
-          }
-
-          // Touche bot ?
-          if (b.owner === 'player') {
-            let hit = false;
-            for (let bot of bots) {
-              if (!bot.alive) continue;
-              const d = Math.hypot(bot.x - b.x, bot.y - b.y);
-              if (d < bot.radius + b.radius) {
-                bot.hp -= b.damage;
-                totalDamageDealt += b.damage;
-                playSound('hit');
-                hit = true;
-                if (bot.hp <= 0) {
-                  bot.alive = false;
-                  playerKills++;
-                  showNotification(`Élimination : ${bot.name} ! (+1 Kill)`);
-                  checkGameOver();
-                }
-                break;
-              }
-            }
-            if (hit) {
-              bullets.splice(i, 1);
-              continue;
-            }
-          }
-        }
-
-        updateHUD();
+        if (hit) continue;
       }
 
-      // RENDU GRAPHIQUE CANVAS 2D
-      function render() {
-        ctx.clearRect(0, 0, width, height);
+      // Bot bullet → player OR bots
+      if (b.owner === 'bot') {
+        if (!player.isDead && Math.hypot(player.x - b.x, player.y - b.y) < player.radius + b.radius) {
+          player.hp -= b.damage;
+          shakeTime = 12;
+          damageVignette = Math.max(damageVignette, 0.9);
+          playSound('hit');
+          bullets.splice(i, 1);
+          if (player.hp <= 0) {
+            player.hp = 0; player.isDead = true;
+            checkGameOver();
+            if (gameState !== 'PLAYING') return;
+          }
+          continue;
+        }
+        let hitBot = false;
+        for (const bot of bots) {
+          if (!bot.alive || bot === b.ownerRef) continue;
+          if (Math.hypot(bot.x - b.x, bot.y - b.y) < bot.radius + b.radius) {
+            bot.hp -= b.damage;
+            if (bot.hp <= 0) killBot(bot, b.ownerRef ? b.ownerRef.name : 'Bot', false);
+            bullets.splice(i, 1); hitBot = true; break;
+          }
+        }
+        if (hitBot) continue;
+      }
+    }
 
-        // Caméra centrée sur le joueur (ou sur la carte si menu)
-        const camX = (gameState === 'PLAYING' || gameState === 'GAMEOVER') ? player.x : 900;
-        const camY = (gameState === 'PLAYING' || gameState === 'GAMEOVER') ? player.y : 900;
+    // Screen effects decay
+    if (shakeTime > 0) shakeTime -= dt;
+    if (hitMarkerTimer > 0) hitMarkerTimer -= dt;
+    if (damageVignette > 0) {
+      damageVignette = Math.max(0, damageVignette - 0.05 * dt);
+      damageVignetteEl.style.opacity = damageVignette;
+    } else if (damageVignetteEl.style.opacity !== '0') {
+      damageVignetteEl.style.opacity = '0';
+    }
 
+    updateHUD();
+  }
+
+  // ==================== RENDER ====================
+  function render() {
+    ctx.clearRect(0, 0, width, height);
+    const camX = (gameState === 'PLAYING' || gameState === 'GAMEOVER') ? player.x : 900;
+    const camY = (gameState === 'PLAYING' || gameState === 'GAMEOVER') ? player.y : 900;
+
+    let sx = 0, sy = 0;
+    if (shakeTime > 0) {
+      const inten = Math.min(1, shakeTime / 12);
+      sx = (Math.random() - 0.5) * 10 * inten;
+      sy = (Math.random() - 0.5) * 10 * inten;
+    }
+
+    ctx.save();
+    ctx.translate(width / 2 - camX + sx, height / 2 - camY + sy);
+
+    // Ground
+    ctx.fillStyle = '#b47738';
+    ctx.fillRect(0, 0, MAP_SIZE, MAP_SIZE);
+    ctx.strokeStyle = 'rgba(120, 70, 30, 0.2)';
+    ctx.lineWidth = 2;
+    for (let gx = 0; gx < MAP_SIZE; gx += 100) { ctx.beginPath(); ctx.moveTo(gx,0); ctx.lineTo(gx,MAP_SIZE); ctx.stroke(); }
+    for (let gy = 0; gy < MAP_SIZE; gy += 100) { ctx.beginPath(); ctx.moveTo(0,gy); ctx.lineTo(MAP_SIZE,gy); ctx.stroke(); }
+
+    // Sand particles
+    sandParticles.forEach(p => {
+      p.x += p.vx; if (p.x > MAP_SIZE) p.x = 0;
+      p.y += p.vy; if (p.y < 0) p.y = MAP_SIZE; else if (p.y > MAP_SIZE) p.y = 0;
+      ctx.fillStyle = `rgba(254, 243, 199, ${p.a})`;
+      ctx.fillRect(p.x, p.y, 2, 2);
+    });
+
+    // Buildings
+    buildings.forEach(b => {
+      ctx.fillStyle = 'rgba(0,0,0,0.35)';
+      ctx.fillRect(b.x + 8, b.y + 8, b.w, b.h);
+      ctx.fillStyle = '#2d221c';
+      ctx.fillRect(b.x, b.y, b.w, b.h);
+      ctx.strokeStyle = '#e07a28'; ctx.lineWidth = 3;
+      ctx.strokeRect(b.x, b.y, b.w, b.h);
+      ctx.fillStyle = '#fad7ac';
+      ctx.font = 'bold 12px Chivo, sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText(b.label, b.x + b.w / 2, b.y + b.h / 2 + 4);
+    });
+
+    // Storm
+    ctx.save();
+    ctx.strokeStyle = 'rgba(224, 122, 40, 0.9)';
+    ctx.lineWidth = 6;
+    ctx.beginPath();
+    ctx.arc(storm.centerX, storm.centerY, storm.radius, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(180, 83, 9, 0.35)';
+    ctx.beginPath();
+    ctx.rect(-200, -200, MAP_SIZE + 400, MAP_SIZE + 400);
+    ctx.arc(storm.centerX, storm.centerY, storm.radius, 0, Math.PI * 2, true);
+    ctx.fill();
+    ctx.restore();
+
+    // Loot
+    loots.forEach(l => {
+      const pulse = 0.9 + 0.15 * Math.sin(Date.now() / 180);
+      ctx.save(); ctx.translate(l.x, l.y);
+      ctx.fillStyle = l.type === 'hp' ? '#10b981' : '#f59e0b';
+      ctx.beginPath(); ctx.arc(0, 0, 11 * pulse, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+      ctx.fillStyle = '#fff'; ctx.font = 'bold 13px sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(l.type === 'hp' ? '❤' : '⚡', 0, 1);
+      ctx.restore();
+    });
+
+    // Bullets
+    bullets.forEach(b => {
+      ctx.fillStyle = b.color;
+      ctx.beginPath(); ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = b.color; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(b.x, b.y); ctx.lineTo(b.x - b.vx * 1.5, b.y - b.vy * 1.5); ctx.stroke();
+    });
+
+    // Bots
+    bots.forEach(bot => {
+      if (!bot.alive) return;
+      ctx.save(); ctx.translate(bot.x, bot.y); ctx.rotate(bot.angle);
+      ctx.fillStyle = '#78716c';
+      ctx.beginPath(); ctx.arc(0, 0, bot.radius, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#44403c'; ctx.lineWidth = 2; ctx.stroke();
+      ctx.fillStyle = '#1c1917'; ctx.fillRect(8, -3, 14, 6);
+      ctx.restore();
+      ctx.fillStyle = '#f5f5f4'; ctx.font = '10px Cairo, sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText(bot.name, bot.x, bot.y - 24);
+      ctx.fillStyle = '#1c1917'; ctx.fillRect(bot.x - 14, bot.y - 20, 28, 4);
+      ctx.fillStyle = '#ef4444'; ctx.fillRect(bot.x - 14, bot.y - 20, (bot.hp / 60) * 28, 4);
+    });
+
+    // Player
+    if (!player.isDead) {
+      // Aim line when dragging
+      if (aimDragging && Math.hypot(aimDx, aimDy) > 12) {
         ctx.save();
-        ctx.translate(width / 2 - camX, height / 2 - camY);
-
-        // 1. Fond du terrain : Dunes et ruelles sablonneuses
-        ctx.fillStyle = '#b47738';
-        ctx.fillRect(0, 0, MAP_SIZE, MAP_SIZE);
-
-        // Motifs de pavés / ruelles de Casbah
-        ctx.strokeStyle = 'rgba(120, 70, 30, 0.2)';
-        ctx.lineWidth = 2;
-        const gridSize = 100;
-        for (let gx = 0; gx < MAP_SIZE; gx += gridSize) {
-          ctx.beginPath();
-          ctx.moveTo(gx, 0);
-          ctx.lineTo(gx, MAP_SIZE);
-          ctx.stroke();
-        }
-        for (let gy = 0; gy < MAP_SIZE; gy += gridSize) {
-          ctx.beginPath();
-          ctx.moveTo(0, gy);
-          ctx.lineTo(MAP_SIZE, gy);
-          ctx.stroke();
-        }
-
-        // 2. Bâtiments & Fortifications
-        buildings.forEach(b => {
-          // Ombre portée
-          ctx.fillStyle = 'rgba(0,0,0,0.35)';
-          ctx.fillRect(b.x + 8, b.y + 8, b.w, b.h);
-
-          // Mur de pierre Casbah
-          ctx.fillStyle = '#2d221c';
-          ctx.fillRect(b.x, b.y, b.w, b.h);
-
-          // Bordure et toit en terrasse
-          ctx.strokeStyle = '#e07a28';
-          ctx.lineWidth = 3;
-          ctx.strokeRect(b.x, b.y, b.w, b.h);
-
-          // Nom du lieu
-          ctx.fillStyle = '#fad7ac';
-          ctx.font = 'bold 12px Chivo, sans-serif';
-          ctx.textAlign = 'center';
-          ctx.fillText(b.label, b.x + b.w / 2, b.y + b.h / 2 + 4);
-        });
-
-        // 3. Cercle de la Tempête de Sable (Storm Zone)
-        ctx.save();
-        // Zone sûre : cercle visible
-        ctx.strokeStyle = 'rgba(224, 122, 40, 0.9)';
-        ctx.lineWidth = 6;
-        ctx.beginPath();
-        ctx.arc(storm.centerX, storm.centerY, storm.radius, 0, Math.PI * 2);
-        ctx.stroke();
-
-        // Zone extérieure toxique (voile de sable orangé)
-        ctx.fillStyle = 'rgba(180, 83, 9, 0.35)';
-        ctx.beginPath();
-        ctx.rect(-200, -200, MAP_SIZE + 400, MAP_SIZE + 400);
-        ctx.arc(storm.centerX, storm.centerY, storm.radius, 0, Math.PI * 2, true);
-        ctx.fill();
-        ctx.restore();
-
-        // 4. Balles en vol
-        bullets.forEach(b => {
-          ctx.fillStyle = b.color;
-          ctx.beginPath();
-          ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
-          ctx.fill();
-          // Traînée
-          ctx.strokeStyle = b.color;
-          ctx.lineWidth = 1.5;
-          ctx.beginPath();
-          ctx.moveTo(b.x, b.y);
-          ctx.lineTo(b.x - b.vx * 1.5, b.y - b.vy * 1.5);
-          ctx.stroke();
-        });
-
-        // 5. Rendu des Bots
-        bots.forEach(bot => {
-          if (!bot.alive) return;
-          ctx.save();
-          ctx.translate(bot.x, bot.y);
-          ctx.rotate(bot.angle);
-
-          // Corps du bot
-          ctx.fillStyle = '#78716c';
-          ctx.beginPath();
-          ctx.arc(0, 0, bot.radius, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.strokeStyle = '#44403c';
-          ctx.lineWidth = 2;
-          ctx.stroke();
-
-          // Canon de l'arme
-          ctx.fillStyle = '#1c1917';
-          ctx.fillRect(8, -3, 14, 6);
-
-          ctx.restore();
-
-          // Nom & Barre de PV du Bot
-          ctx.fillStyle = '#f5f5f4';
-          ctx.font = '10px Cairo, sans-serif';
-          ctx.textAlign = 'center';
-          ctx.fillText(bot.name, bot.x, bot.y - 24);
-
-          // Mini jauge
-          ctx.fillStyle = '#1c1917';
-          ctx.fillRect(bot.x - 14, bot.y - 20, 28, 4);
-          ctx.fillStyle = '#ef4444';
-          ctx.fillRect(bot.x - 14, bot.y - 20, (bot.hp / 60) * 28, 4);
-        });
-
-        // 6. Rendu du Joueur (Fennec / Élite Saharien)
-        if (!player.isDead) {
-          ctx.save();
-          ctx.translate(player.x, player.y);
-          ctx.rotate(player.angle);
-
-          // Aura de visée
-          ctx.strokeStyle = 'rgba(224, 122, 40, 0.4)';
-          ctx.lineWidth = 1;
-          ctx.setLineDash([4, 4]);
-          ctx.beginPath();
-          ctx.moveTo(20, 0);
-          ctx.lineTo(160, 0);
-          ctx.stroke();
-          ctx.setLineDash([]);
-
-          // Corps du fennec (Doré saharien)
-          ctx.fillStyle = '#d97706';
-          ctx.beginPath();
-          ctx.arc(0, 0, player.radius, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.strokeStyle = '#fef3c7';
-          ctx.lineWidth = 2.5;
-          ctx.stroke();
-
-          // Oreilles de fennec
-          ctx.fillStyle = '#92400e';
-          ctx.beginPath();
-          ctx.ellipse(-6, -13, 5, 8, -Math.PI / 6, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.beginPath();
-          ctx.ellipse(-6, 13, 5, 8, Math.PI / 6, 0, Math.PI * 2);
-          ctx.fill();
-
-          // Chèche / Tagelmust (Vert émeraude / Noir)
-          ctx.fillStyle = '#065f46';
-          ctx.beginPath();
-          ctx.arc(-2, 0, 10, -Math.PI / 2, Math.PI / 2);
-          ctx.fill();
-
-          // Arme tenue en main
-          ctx.fillStyle = WEAPONS[player.activeWeaponIdx].color;
-          ctx.fillRect(8, -3.5, 16, 7);
-
-          ctx.restore();
-
-          // Tag "TOI / أنت"
-          ctx.fillStyle = '#fef08a';
-          ctx.font = 'bold 11px Cairo, sans-serif';
-          ctx.textAlign = 'center';
-          ctx.fillText("أنت (Joueur)", player.x, player.y - 24);
-        }
-
+        ctx.strokeStyle = 'rgba(253, 224, 71, 0.6)'; ctx.lineWidth = 2;
+        ctx.setLineDash([8, 6]);
+        const endX = player.x + Math.cos(player.angle) * 220;
+        const endY = player.y + Math.sin(player.angle) * 220;
+        ctx.beginPath(); ctx.moveTo(player.x, player.y); ctx.lineTo(endX, endY); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.beginPath(); ctx.arc(endX, endY, 7, 0, Math.PI * 2); ctx.stroke();
         ctx.restore();
       }
 
-      // BOUCLE D'ANIMATION PRINCIPALE
-      function loop() {
-        update();
-        render();
-        requestAnimationFrame(loop);
+      ctx.save(); ctx.translate(player.x, player.y); ctx.rotate(player.angle);
+      // Reload indicator
+      if (player.reloading) {
+        const t = (Date.now() - (player.reloadEndTime - WEAPONS[player.activeWeaponIdx].reload)) / WEAPONS[player.activeWeaponIdx].reload;
+        ctx.strokeStyle = 'rgba(250, 204, 21, 0.9)';
+        ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.arc(0, 0, player.radius + 6, -Math.PI / 2, -Math.PI / 2 + t * Math.PI * 2); ctx.stroke();
       }
-      requestAnimationFrame(loop);
+      ctx.fillStyle = '#d97706';
+      ctx.beginPath(); ctx.arc(0, 0, player.radius, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#fef3c7'; ctx.lineWidth = 2.5; ctx.stroke();
+      ctx.fillStyle = '#92400e';
+      ctx.beginPath(); ctx.ellipse(-6, -13, 5, 8, -Math.PI / 6, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(-6, 13, 5, 8, Math.PI / 6, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#065f46';
+      ctx.beginPath(); ctx.arc(-2, 0, 10, -Math.PI / 2, Math.PI / 2); ctx.fill();
+      ctx.fillStyle = WEAPONS[player.activeWeaponIdx].color;
+      ctx.fillRect(8, -3.5, 16, 7);
+      ctx.restore();
+      ctx.fillStyle = '#fef08a'; ctx.font = 'bold 11px Cairo, sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText("أنت (Joueur)", player.x, player.y - 24);
+    }
 
-    })();
-  </script>
+    ctx.restore();
+
+    // ===== SCREEN SPACE UI =====
+    // Minimap
+    drawMinimap();
+
+    // Hitmarker
+    if (hitMarkerTimer > 0) {
+      const cx = width / 2, cy = height / 2;
+      const alpha = Math.min(1, hitMarkerTimer / 8);
+      ctx.save();
+      ctx.strokeStyle = `rgba(253, 224, 71, ${alpha})`;
+      ctx.lineWidth = 3; ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(cx - 12, cy - 12); ctx.lineTo(cx - 5, cy - 5);
+      ctx.moveTo(cx + 12, cy - 12); ctx.lineTo(cx + 5, cy - 5);
+      ctx.moveTo(cx - 12, cy + 12); ctx.lineTo(cx - 5, cy + 5);
+      ctx.moveTo(cx + 12, cy + 12); ctx.lineTo(cx + 5, cy + 5);
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  function drawMinimap() {
+    const S = 110, pad = 12, y0 = 85, x0 = pad;
+    const sc = S / MAP_SIZE;
+    ctx.save();
+    ctx.globalAlpha = 0.88;
+    ctx.fillStyle = 'rgba(28, 25, 23, 0.92)';
+    ctx.fillRect(x0, y0, S, S);
+    ctx.strokeStyle = 'rgba(224, 122, 40, 0.65)';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(x0, y0, S, S);
+    // Buildings
+    ctx.fillStyle = 'rgba(120, 113, 108, 0.4)';
+    buildings.forEach(b => ctx.fillRect(x0 + b.x * sc, y0 + b.y * sc, b.w * sc, b.h * sc));
+    // Storm
+    ctx.strokeStyle = 'rgba(239, 68, 68, 0.85)';
+    ctx.beginPath();
+    ctx.arc(x0 + storm.centerX * sc, y0 + storm.centerY * sc, storm.radius * sc, 0, Math.PI * 2);
+    ctx.stroke();
+    // Loot
+    ctx.fillStyle = '#22d3ee';
+    loots.forEach(l => ctx.fillRect(x0 + l.x * sc - 1, y0 + l.y * sc - 1, 2.5, 2.5));
+    // Nearby bots
+    ctx.fillStyle = '#ef4444';
+    bots.forEach(b => {
+      if (b.alive && Math.hypot(b.x - player.x, b.y - player.y) < 500) {
+        ctx.fillRect(x0 + b.x * sc - 1.5, y0 + b.y * sc - 1.5, 3, 3);
+      }
+    });
+    // Player
+    ctx.fillStyle = '#fde047';
+    ctx.beginPath(); ctx.arc(x0 + player.x * sc, y0 + player.y * sc, 3.5, 0, Math.PI * 2); ctx.fill();
+    // Label
+    ctx.fillStyle = 'rgba(224, 122, 40, 0.9)';
+    ctx.font = 'bold 9px Chivo, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('CARTE', x0 + 4, y0 - 3);
+    ctx.restore();
+  }
+
+  // ==================== MAIN LOOP ====================
+  let lastTime = performance.now();
+  function loop(now) {
+    const dt = Math.min(3, (now - lastTime) / 16.67);
+    lastTime = now;
+    update(dt);
+    render();
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+
+})();
+</script>
 </body>
 </html>
