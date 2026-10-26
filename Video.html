@@ -1,529 +1,318 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Le Mystère du Mary Celeste — Vidéo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Le Prix du Passage — Motion Design</title>
 <style>
-  body{margin:0;background:#000;color:#eee;font-family:system-ui,sans-serif;text-align:center;padding:20px}
-  canvas{max-width:100%;max-height:70vh;border-radius:12px;border:1px solid #333}
-  button{padding:14px 28px;font-size:16px;font-weight:600;border:none;border-radius:8px;cursor:pointer;margin:8px;color:#fff}
-  #play{background:#e63946}#rec{background:#4361ee}#rec:disabled,#play:disabled{opacity:.4;cursor:not-allowed}
-  #dl{background:#2a9d8f;display:none;text-decoration:none;padding:14px 28px;border-radius:8px;color:#fff;font-weight:600}
-  #status{margin:16px;color:#aaa;min-height:24px}
+:root {
+  --bg:#090a0d; --panel:#121419; --gold:#e8b75c;
+  --text:#f4ebdd; --muted:#a6a7ad; --line:#303139;
+  --blue:#647f9a;
+}
+* { box-sizing:border-box }
+body {
+  margin:0; background:var(--bg); color:var(--text);
+  font-family:Arial,"Noto Sans Arabic",sans-serif;
+  line-height:1.6;
+}
+header {
+  padding:48px 24px 32px;
+  border-bottom:1px solid var(--line);
+  background:radial-gradient(ellipse at 50% 0%,#4b351c 0%,transparent 65%);
+}
+.container {max-width:1100px;margin:auto}
+.eyebrow {color:var(--gold);letter-spacing:3px;font-size:11px;text-transform:uppercase}
+h1 {font-family:Georgia,serif;font-size:clamp(36px,7vw,66px);line-height:1.05;font-weight:400;margin:18px 0}
+h2 {font-family:Georgia,serif;font-weight:400;font-size:27px}
+h3 {font-size:17px;margin:0 0 10px}
+p {margin:8px 0}
+.muted {color:var(--muted);font-size:14px}
+.gold {color:var(--gold)}
+.hero-line {max-width:600px;color:#c8c4bc}
+.pills {display:flex;gap:8px;flex-wrap:wrap;margin-top:22px}
+.pill {border:1px solid #57462e;border-radius:30px;padding:6px 12px;font-size:12px;color:var(--gold)}
+main {padding:28px 20px 70px}
+.toolbar {display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px}
+button {
+  background:#1b1c22;color:var(--text);border:1px solid var(--line);
+  border-radius:8px;padding:11px 15px;cursor:pointer;font:inherit;font-size:13px;
+}
+button:hover {border-color:var(--gold);color:var(--gold)}
+button.active {background:var(--gold);color:#15110a;border-color:var(--gold)}
+.timeline {display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin:20px 0 35px}
+.segment {height:7px;background:#34353b;border-radius:8px;cursor:pointer}
+.segment.active {background:var(--gold)}
+.segment:hover {background:#c99b4d}
+.scene {
+  display:grid;grid-template-columns:1fr 1fr;gap:26px;
+  padding:24px 0 34px;border-bottom:1px solid var(--line);
+  scroll-margin-top:20px;
+}
+.scene[hidden] {display:none}
+.visual {
+  min-height:320px;border-radius:12px;overflow:hidden;
+  position:relative;display:flex;align-items:flex-end;padding:22px;
+  background:
+    radial-gradient(ellipse at 50% 45%,#e8b75c55,transparent 25%),
+    linear-gradient(90deg,#090a0d,#292016 48%,#090a0d);
+}
+.visual:before {
+  content:"";position:absolute;width:40%;height:72%;left:30%;top:10%;
+  border:5px solid #9d733b;
+  border-bottom:0;
+  box-shadow:0 0 30px #e8b75c44,inset 0 0 25px #e8b75c22;
+}
+.visual:after {
+  content:"";position:absolute;left:49%;top:22%;height:68%;width:2px;
+  background:#ffe5a0;box-shadow:0 0 30px 8px #e8b75c;
+}
+.visual .label {position:relative;z-index:1;font-size:11px;letter-spacing:2px;color:#e9d1a1}
+.scene:nth-of-type(3) .visual {filter:hue-rotate(12deg)}
+.scene-copy {min-width:0}
+.time {font-size:12px;letter-spacing:2px;color:var(--gold)}
+.arabic {
+  font-size:21px;line-height:1.8;text-align:right;
+  direction:rtl;margin:14px 0;
+}
+.details {display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:20px 0}
+.detail {background:var(--panel);border:1px solid var(--line);padding:14px;border-radius:8px}
+.detail h3 {color:var(--gold);font-size:12px;text-transform:uppercase;letter-spacing:1px}
+.prompt {
+  background:#0e0f13;border:1px solid var(--line);border-radius:8px;
+  padding:15px;margin-top:14px;font-size:13px;color:#d0d0d3;
+}
+.prompt p {white-space:normal}
+.prompt button {margin-top:10px}
+section.block {padding:35px 0;border-bottom:1px solid var(--line)}
+.palette {display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.swatch {height:65px;border-radius:6px;margin-bottom:8px}
+.swatch-label {font-size:12px}
+.check {display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);font-size:14px}
+.check input {accent-color:var(--gold);width:17px;height:17px}
+.progress {height:4px;background:#333;border-radius:4px;margin:16px 0}
+.progress div {height:100%;background:var(--gold);width:0%;transition:width .2s}
+footer {padding:25px 20px;text-align:center;color:var(--muted);font-size:12px}
+@media(max-width:700px) {
+ header {padding:34px 20px}
+ .scene {grid-template-columns:1fr;gap:15px}
+ .visual {min-height:270px}
+ .details {grid-template-columns:1fr 1fr}
+ .palette {grid-template-columns:repeat(2,1fr)}
+ .timeline {grid-template-columns:repeat(3,1fr)}
+}
+@media print {
+ body {background:white;color:#161616}
+ .toolbar,.timeline,button {display:none}
+ .scene[hidden] {display:grid}
+ .scene,.detail,.prompt {break-inside:avoid;background:white;color:#222;border-color:#ccc}
+ .visual {min-height:200px}
+}
 </style>
 </head>
 <body>
+<header>
+  <div class="container">
+    <div class="eyebrow">Creative direction · Film 001</div>
+    <h1>Le Prix du<br><span class="gold">Passage.</span></h1>
+    <p class="hero-line">Une porte. Une question. Un nouveau monde. Un film de motion design sur la véritable signification d'une résolution dramatique.</p>
+    <div class="pills">
+      <span class="pill">34 secondes</span>
+      <span class="pill">Vertical 9:16</span>
+      <span class="pill">Cinéma réaliste</span>
+      <span class="pill">Darija algérienne</span>
+    </div>
+  </div>
+</header>
 
-<h2>🎬 Le Mystère du Mary Celeste</h2>
-<canvas id="c" width="1080" height="1920"></canvas>
-<div>
-  <button id="play">▶️ Aperçu (avec son)</button>
-  <button id="rec">🎬 Enregistrer la vidéo</button>
-  <a id="dl" download="mary-celeste.webm">⬇️ Télécharger WebM</a>
-</div>
-<div id="status">Prêt.</div>
+<main class="container">
+  <section class="block">
+    <div class="eyebrow">01 — Production board</div>
+    <h2>Storyboard interactif</h2>
+    <p class="muted">Sélectionne un plan pour consulter son intention, son timing et son prompt de génération.</p>
+    <div class="timeline" id="timeline"></div>
+    <div class="toolbar">
+      <button class="active" data-filter="all">Tous les plans</button>
+      <button data-filter="visual">Direction visuelle</button>
+      <button data-filter="audio">Voix & son</button>
+      <button onclick="window.print()">Exporter en PDF</button>
+    </div>
+  </section>
+
+  <div id="scenes"></div>
+
+  <section class="block">
+    <div class="eyebrow">02 — Visual identity</div>
+    <h2>Palette cinématographique</h2>
+    <div class="palette">
+      <div><div class="swatch" style="background:#090a0d"></div><div class="swatch-label">Noir profond<br>#090A0D</div></div>
+      <div><div class="swatch" style="background:#e8b75c"></div><div class="swatch-label">Or incandescent<br>#E8B75C</div></div>
+      <div><div class="swatch" style="background:#f4ebdd"></div><div class="swatch-label">Ivoire<br>#F4EBDD</div></div>
+      <div><div class="swatch" style="background:#647f9a"></div><div class="swatch-label">Bleu froid<br>#647F9A</div></div>
+    </div>
+    <div class="details">
+      <div class="detail"><h3>Typographie</h3><p>Noto Sans Arabic pour les textes arabes. Montserrat pour les annotations latines. Georgia pour les titres éditoriaux.</p></div>
+      <div class="detail"><h3>Caméra</h3><p>Travellings lents, cadres symétriques, perspective 35 mm, profondeur de champ maîtrisée.</p></div>
+      <div class="detail"><h3>Lumière</h3><p>Source chaude derrière la porte, volumétrie subtile, noirs texturés et hautes lumières contrôlées.</p></div>
+      <div class="detail"><h3>Continuité</h3><p>Même porte, même manteau anthracite, même silhouette et même architecture dans les scènes liées.</p></div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="eyebrow">03 — Delivery</div>
+    <h2>Checklist de production</h2>
+    <p class="muted">Coche les étapes terminées. La progression est conservée pendant cette session du navigateur.</p>
+    <div class="progress"><div id="progressbar"></div></div>
+    <p id="progresslabel" class="muted">0 / 8 étapes terminées</p>
+    <div id="checklist"></div>
+  </section>
+</main>
+
+<footer>LE PRIX DU PASSAGE · MOTION DESIGN PRODUCTION DOCUMENT · 9:16</footer>
 
 <script>
-// ============ CONFIG ============
-const W = 1080, H = 1920;
-const canvas = document.getElementById('c');
-const ctx = canvas.getContext('2d');
-const status = document.getElementById('status');
-
-const SCENES = [
-  { start:0,  end:4,  voice:"Dans la cale du Mary Celeste, il y avait mille sept cent un barils d'alcool industriel.",
-    text:"1 701 barils d'alcool... et un mystère", draw:drawS1, sfx:['drop','thud'] },
-  { start:4,  end:8,  voice:"Neuf d'entre eux étaient complètement vides, ou avaient fui.",
-    text:"9 barils VIDES", draw:drawS2, sfx:['creak'] },
-  { start:8,  end:13, voice:"L'hypothèse ? Des vapeurs invisibles, un craquement suspect, et la terreur d'une explosion imminente.",
-    text:"Vapeurs explosives ?", draw:drawS3, sfx:['hiss','heartbeat'] },
-  { start:13, end:18, voice:"En panique, le capitaine fait évacuer tout le monde sur le canot, relié au navire par un simple cordage.",
-    text:"Évacuation d'urgence", draw:drawS4, sfx:['splash'] },
-  { start:18, end:23, voice:"Sauf que... le cordage cède.",
-    text:"Le cordage CÈDE !", draw:drawS5, sfx:['snap'] },
-  { start:23, end:28, voice:"Le canot dérive lentement dans l'immensité. Le Mary Celeste, lui, continue sa route... seul.",
-    text:"Abandonnés en pleine mer", draw:drawS6, sfx:['wind'] },
-  { start:28, end:33, voice:"En 2006, la science a prouvé que ces vapeurs créent une onde de choc spectaculaire, sans laisser de brûlure.",
-    text:"Test scientifique (2006) : onde de choc sans feu", draw:drawS7, sfx:['whoosh'] },
-  { start:33, end:37, voice:"Mais attention : cela reste une hypothèse, jamais une preuve absolue.",
-    text:"HYPOTHÈSE, PAS UNE PREUVE", draw:drawS8, sfx:['bell'] },
-  { start:37, end:40, voice:"Et toi, tu penses que c'est ce qui s'est passé ? Dis-le-moi en commentaire !",
-    text:"Et toi, t'y crois ? Dis-le en commentaire !", draw:drawS9, sfx:['synthRise','ding'] },
+const scenes = [
+{
+id:1,time:"00:00 — 00:03",title:"La porte entrouverte",tag:"HOOK",
+voice:"الحل ماشي ديما نهاية سعيدة.",
+subtitle:"La solution n'est pas toujours une fin heureuse.",
+visual:"Porte dorée monumentale, silhouette immobile, filet de lumière ambrée.",
+camera:"Plan général symétrique. Travelling avant de 100 % à 104 %. Pulse lumineux à 2,3 s.",
+sound:"Grondement grave, souffle d'air et craquement métallique discret.",
+prompt:`Photorealistic cinematic still, vertical 9:16. A monumental antique gold double door, aged brushed metal with subtle engraved geometric details, set into massive matte black basalt walls inside a vast dark architectural chamber. The door is barely open, a narrow slit of intense warm amber light leaking through. One anonymous adult human silhouette wearing a long charcoal-black coat stands perfectly still with their back to camera, centered in the lower third, facing the door. No visible face. Symmetrical composition, 35mm cinema lens, eye-level camera, deep shadows, controlled volumetric god rays, subtle floating dust, realistic stone textures, restrained gold highlights, fine cinematic film grain, premium live-action film aesthetic. No text, no watermark, no extra people, no game-render aesthetic.`
+},
+{
+id:2,time:"00:03 — 00:09",title:"La fausse promesse",tag:"RUPTURE",
+voice:"بزاف يحسبو بلي الحل لازم يكون نهاية حلوة والبطل يربح. غالط.",
+subtitle:"Beaucoup pensent que la solution doit être une fin heureuse où le héros gagne. Erreur.",
+visual:"Explosion de lumière dorée, particules suspendues puis disparition.",
+camera:"Explosion entre 3 et 5 s, suspension entre 5 et 7 s, extinction rapide à 9 s.",
+sound:"Montée orchestrale courte, coupure franche sur « غالط ».",
+prompt:`Photorealistic cinematic macro shot, vertical 9:16. A concentrated burst of incandescent golden light dissolving into hundreds of tiny realistic gold dust particles suspended in deep black darkness. Bright luminous core slightly above center, fine particles spreading radially, depth and subtle defocus, elegant restrained gold palette, realistic volumetric light scattering, deep blacks, cinematic slow-motion photography, premium art-film atmosphere, controlled exposure, fine film grain. No fireworks, no colorful confetti, no people, no text, no watermark, no video-game graphics.`
+},
+{
+id:3,time:"00:09 — 00:20",title:"Le vrai passage",tag:"CLIMAX",
+voice:"الحل هو لما القصة تجاوب على السؤال لي بداتها بيه، والبطل يخلص ثمن اختيارو، ويدخل لعالم جديد.",
+subtitle:"La solution arrive quand l'histoire répond à sa question initiale, que le héros paie le prix de son choix et entre dans un nouveau monde.",
+visual:"La porte s'ouvre, la lumière descend, le héros franchit le seuil.",
+camera:"Ouverture progressive, faisceau lumineux descendant, travelling qui accompagne le personnage.",
+sound:"Métal lourd, résonance architecturale, pas sourds et montée harmonique.",
+prompt:`Photorealistic cinematic live-action film still, vertical 9:16. The same monumental antique gold double door and matte black basalt architecture as the previous shot, now opened wide into a vast mysterious chamber. The same anonymous adult protagonist in the same long charcoal-black coat, viewed strictly from behind, is beginning to cross the threshold. A powerful warm amber beam illuminates the dark stone floor, suspended dust and realistic atmospheric haze. Symmetrical framing, 35mm cinema lens, aged metallic gold, physically believable light, subtle volumetric rays, fine film grain, serious psychological drama. No face visible, no extra characters, no clothing change, no text, no watermark, no game-render look.`
+},
+{
+id:4,time:"00:20 — 00:26",title:"La transformation",tag:"RÉVÉLATION",
+voice:"كي تحلل فيلم، اسقسي روحك: واش البطل رجع كيما كان ولا تبدل؟",
+subtitle:"Quand tu analyses un film, demande-toi : le héros est-il revenu comme avant ou a-t-il changé ?",
+visual:"Le héros découvre un monde froid, bleu et inconnu, avec une posture transformée.",
+camera:"Caméra stabilisée, avancée lente, transition colorimétrique de l'or au bleu froid.",
+sound:"Nappe atmosphérique, note musicale suspendue, respiration subtile.",
+prompt:`Photorealistic cinematic live-action still, vertical 9:16. The same anonymous protagonist, wearing the identical long charcoal-black coat, viewed from behind after crossing the same monumental gold doorway. The dark basalt architecture remains recognizable, but beyond the threshold lies an unfamiliar vast environment filled with cool desaturated blue mist, distant monumental silhouettes and pale ivory light. A restrained warm amber rim light outlines the protagonist's shoulders. The character stands still, posture subtly more upright, looking toward the unknown. Wide cinematic composition, 35mm lens, realistic fog, controlled contrast, fine film grain, premium psychological cinema. No visible face, no different clothing, no extra people, no text, no watermark.`
+},
+{
+id:5,time:"00:26 — 00:29",title:"Les trois portes",tag:"TEASER",
+voice:"غدا: كيفاش القصة كاملة تتبني فـ3 أجزاء 👀",
+subtitle:"Demain : comment construire toute une histoire en 3 parties.",
+visual:"Trois portes identiques alignées, celle du centre s'illumine davantage.",
+camera:"Apparition successive par masques, accent lumineux sur la porte centrale.",
+sound:"Trois impulsions sonores distinctes, la dernière plus grave.",
+prompt:`Photorealistic cinematic architectural still, vertical 9:16. Three identical monumental antique gold double doors aligned horizontally inside the same vast black basalt chamber. All doors share precisely the same design, proportions, aged brushed metal finish and subtle geometric engraving. The central door emits a slightly stronger warm amber light; the side doors remain dimmer. Symmetrical frontal composition, dark polished stone floor with restrained gold reflections, immense negative space, realistic volumetric light, fine atmospheric dust, premium architectural cinematography. All three doors completely visible. No people, no text, no watermark.`
+},
+{
+id:6,time:"00:29 — 00:34",title:"Le CTA",tag:"CONVERSION",
+voice:"حاب تفتح الباب؟ أكتب dramaturgie في التعليقات و دير متابعة باش يوصلك جديد",
+subtitle:"Tu veux ouvrir la porte ? Écris « dramaturgie » en commentaire et abonne-toi pour la suite.",
+visual:"Seuil lumineux sur sol noir, espace sombre réservé à la typographie.",
+camera:"Fond minimaliste, texte en deux temps, pulsation discrète du seuil.",
+sound:"Résolution musicale douce, tintement métallique final, fondu sonore.",
+prompt:`Photorealistic cinematic minimal still, vertical 9:16. A narrow glowing amber-gold threshold of light stretches horizontally across a dark polished black basalt floor in a monumental shadowy chamber. A few fine golden dust particles drift close to the light. Large uninterrupted areas of deep charcoal-black negative space in the central and upper-middle portions of the image, suitable for overlaid typography. Subtle realistic floor reflections, soft volumetric glow, restrained gold highlights, elegant dark luxury aesthetic, physically plausible lighting, fine cinematic film grain. No typography, no letters, no symbols, no watermark, no people.`
+}
 ];
-const TOTAL = 40;
 
-// ============ AUDIO ============
-let audioCtx, masterGain, recDest;
-function initAudio() {
-  if (audioCtx) return;
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  masterGain = audioCtx.createGain();
-  masterGain.gain.value = 0.6;
-  masterGain.connect(audioCtx.destination);
-  recDest = audioCtx.createMediaStreamDestination();
-  masterGain.connect(recDest);
-}
-function now() { return audioCtx.currentTime; }
+const scenesEl=document.getElementById("scenes");
+const timeline=document.getElementById("timeline");
 
-function tone(t, f0, f1, dur, vol, type='sine') {
-  const o = audioCtx.createOscillator(), g = audioCtx.createGain();
-  o.type = type;
-  o.frequency.setValueAtTime(f0, t);
-  o.frequency.exponentialRampToValueAtTime(Math.max(f1,1), t + dur);
-  g.gain.setValueAtTime(vol, t);
-  g.gain.exponentialRampToValueAtTime(0.001, t + dur);
-  o.connect(g).connect(masterGain); o.start(t); o.stop(t + dur + 0.05);
-}
-function noise(t, dur, filterType, f0, f1, vol) {
-  const sr = audioCtx.sampleRate;
-  const buf = audioCtx.createBuffer(1, sr * dur, sr);
-  const d = buf.getChannelData(0);
-  for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
-  const src = audioCtx.createBufferSource(); src.buffer = buf;
-  const f = audioCtx.createBiquadFilter(); f.type = filterType;
-  f.frequency.setValueAtTime(f0, t);
-  f.frequency.exponentialRampToValueAtTime(Math.max(f1,1), t + dur);
-  const g = audioCtx.createGain();
-  g.gain.setValueAtTime(vol, t);
-  g.gain.exponentialRampToValueAtTime(0.001, t + dur);
-  src.connect(f).connect(g).connect(masterGain); src.start(t); src.stop(t + dur);
-}
+scenes.forEach((s,i)=>{
+  const seg=document.createElement("button");
+  seg.className="segment"+(i===0?" active":"");
+  seg.setAttribute("aria-label","Plan "+s.id);
+  seg.title=s.time+" · "+s.title;
+  seg.onclick=()=>{document.getElementById("scene"+s.id).scrollIntoView({behavior:"smooth"});setActive(s.id)};
+  timeline.appendChild(seg);
 
-const SFX = {
-  drop:      t => { tone(t, 1400, 400, 0.12, 0.35); tone(t+0.02, 800, 200, 0.15, 0.2); },
-  thud:      t => tone(t, 90, 35, 0.6, 0.7),
-  creak:     t => { for (let i=0;i<3;i++) noise(t+i*0.15, 0.4, 'bandpass', 400, 200, 0.15); },
-  hiss:      t => noise(t, 1.5, 'highpass', 800, 4000, 0.2),
-  heartbeat: t => { tone(t, 80, 40, 0.15, 0.5); tone(t+0.2, 80, 40, 0.15, 0.4); tone(t+0.9, 80, 40, 0.15, 0.5); tone(t+1.1, 80, 40, 0.15, 0.4); },
-  splash:    t => { noise(t, 0.6, 'lowpass', 3000, 300, 0.35); tone(t, 200, 80, 0.3, 0.25); },
-  snap:      t => { noise(t, 0.08, 'highpass', 2000, 6000, 0.7); tone(t, 400, 100, 0.1, 0.4); },
-  wind:      t => { noise(t, 3, 'bandpass', 400, 800, 0.15); noise(t+1, 2, 'bandpass', 600, 300, 0.1); },
-  whoosh:    t => { noise(t, 0.8, 'bandpass', 200, 3000, 0.5); tone(t, 100, 800, 0.8, 0.15, 'sawtooth'); },
-  bell:      t => { tone(t, 880, 880, 1.5, 0.3); tone(t, 1320, 1320, 1.2, 0.15); },
-  synthRise: t => tone(t, 200, 800, 0.8, 0.2, 'sawtooth'),
-  ding:      t => { tone(t, 1500, 1500, 0.3, 0.3); tone(t+0.05, 2000, 2000, 0.3, 0.15); },
-};
-
-// ============ DESSINS DES SCÈNES ============
-// Chaque fonction reçoit (ctx, t_local, W, H)
-
-function vignette(ctx, W, H) {
-  const vg = ctx.createRadialGradient(W/2, H/2, W*0.2, W/2, H/2, W*0.9);
-  vg.addColorStop(0, 'rgba(0,0,0,0)');
-  vg.addColorStop(1, 'rgba(0,0,0,0.85)');
-  ctx.fillStyle = vg; ctx.fillRect(0,0,W,H);
-}
-function barrel(ctx, x, y, r, hue=30, empty=false) {
-  const g = ctx.createRadialGradient(x-r*0.3, y-r*0.3, 0, x, y, r);
-  if (empty) { g.addColorStop(0,'#3a2a1a'); g.addColorStop(1,'#0f0803'); }
-  else { g.addColorStop(0,`hsl(${hue},40%,35%)`); g.addColorStop(1,`hsl(${hue},60%,10%)`); }
-  ctx.fillStyle = g;
-  ctx.beginPath(); ctx.ellipse(x, y, r, r*1.25, 0, 0, Math.PI*2); ctx.fill();
-  ctx.strokeStyle = '#1a0e05'; ctx.lineWidth = r*0.12;
-  for (let i=-1; i<=1; i++) {
-    ctx.beginPath(); ctx.ellipse(x, y+i*r*0.7, r*0.95, r*0.14, 0, 0, Math.PI*2); ctx.stroke();
-  }
-}
-
-// Plan 1 — Barils dans la cale, zoom avant
-function drawS1(ctx, t, W, H) {
-  ctx.fillStyle = '#0a0604'; ctx.fillRect(0,0,W,H);
-  const zoom = 1 + t*0.18;
-  ctx.save(); ctx.translate(W/2, H/2); ctx.scale(zoom, zoom); ctx.translate(-W/2, -H/2);
-  const bs = [
-    [W*0.15,H*0.35,W*0.18],[W*0.5,H*0.28,W*0.22],[W*0.85,H*0.38,W*0.17],
-    [W*0.3,H*0.65,W*0.2],[W*0.7,H*0.72,W*0.21],[W*0.5,H*0.95,W*0.24],
-    [W*0.1,H*0.85,W*0.16],[W*0.9,H*0.9,W*0.18],
-  ];
-  bs.forEach((b,i) => barrel(ctx, b[0], b[1], b[2], 25 + i*4));
-  ctx.restore(); vignette(ctx, W, H);
-}
-
-// Plan 2 — 9 barils dont 1 vide/marqué
-function drawS2(ctx, t, W, H) {
-  ctx.fillStyle = '#080a0a'; ctx.fillRect(0,0,W,H);
-  const cols=3, rows=3, cw=W*0.28, ch=H*0.15;
-  const startX = (W - cols*cw)/2 + cw/2, startY = H*0.2;
-  for (let i=0; i<9; i++) {
-    const cx = startX + (i%cols)*cw;
-    const cy = startY + Math.floor(i/cols)*ch;
-    const isEmpty = i===4;
-    barrel(ctx, cx, cy, W*0.11, 25, isEmpty);
-    if (isEmpty) {
-      // Marque rouge pulsée
-      const pulse = 1 + Math.sin(t*8)*0.15;
-      ctx.fillStyle = '#ff0033';
-      ctx.font = `bold ${W*0.09*pulse}px 'Arial Black'`;
-      ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillText('X', cx, cy);
+  const el=document.createElement("article");
+  el.className="scene";
+  el.id="scene"+s.id;
+  el.dataset.visual="true";
+  el.innerHTML=`
+    <div class="visual"><span class="label">SCENE 0${s.id} / ${s.tag}</span></div>
+    <div class="scene-copy">
+      <div class="time">${s.time} · PLAN 0${s.id}</div>
+      <h2>${s.title}</h2>
+      <div class="arabic" lang="ar" dir="rtl">${s.voice}</div>
+      <p class="muted"><strong>Sous-titre :</strong> ${s.subtitle}</p>
+      <div class="details">
+        <div class="detail"><h3>Image</h3><p>${s.visual}</p></div>
+        <div class="detail"><h3>Caméra & motion</h3><p>${s.camera}</p></div>
+        <div class="detail" style="grid-column:1/-1"><h3>Sound design</h3><p>${s.sound}</p></div>
+      </div>
+      <div class="prompt"><h3>Prompt IA — image maître</h3><p>${s.prompt}</p><button class="copy">Copier le prompt</button></div>
+    </div>`;
+  scenesEl.appendChild(el);
+  el.querySelector(".copy").onclick=async e=>{
+    try {
+      await navigator.clipboard.writeText(s.prompt);
+      e.target.textContent="Prompt copié ✓";
+    } catch {
+      const ta=document.createElement("textarea");
+      ta.value=s.prompt;document.body.appendChild(ta);
+      ta.select();document.execCommand("copy");ta.remove();
+      e.target.textContent="Prompt copié ✓";
     }
-  }
-  ctx.fillStyle='#ff3344'; ctx.font=`bold ${W*0.11}px 'Arial Black'`;
-  ctx.textAlign='center';
-  ctx.fillText('9 VIDES', W/2, H*0.87);
-  vignette(ctx, W, H);
-}
-
-// Plan 3 — Vapeurs + visage terrifié
-function drawS3(ctx, t, W, H) {
-  ctx.fillStyle = '#0a0a12'; ctx.fillRect(0,0,W,H);
-  for (let i=0; i<25; i++) {
-    const x = (i*173 + t*50) % W;
-    const y = H - ((Math.sin(i*7.31) + 1)/2) * H*0.55 - t*40;
-    const r = 50 + Math.sin(i + t*3)*30;
-    const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-    g.addColorStop(0, 'rgba(180,210,255,0.28)');
-    g.addColorStop(1, 'rgba(180,210,255,0)');
-    ctx.fillStyle = g;
-    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.fill();
-  }
-  // Visage
-  ctx.fillStyle='#141414';
-  ctx.beginPath(); ctx.ellipse(W/2, H*0.42, W*0.2, H*0.24, 0, 0, Math.PI*2); ctx.fill();
-  ctx.fillStyle='#fff';
-  ctx.beginPath();
-  ctx.arc(W/2-W*0.07, H*0.38, W*0.045, 0, Math.PI*2);
-  ctx.arc(W/2+W*0.07, H*0.38, W*0.045, 0, Math.PI*2); ctx.fill();
-  ctx.fillStyle='#000';
-  const eyeShift = Math.sin(t*12)*W*0.005;
-  ctx.beginPath();
-  ctx.arc(W/2-W*0.07+eyeShift, H*0.38, W*0.015, 0, Math.PI*2);
-  ctx.arc(W/2+W*0.07+eyeShift, H*0.38, W*0.015, 0, Math.PI*2); ctx.fill();
-  ctx.fillStyle='#000';
-  ctx.beginPath(); ctx.ellipse(W/2, H*0.52, W*0.035, H*0.055, 0, 0, Math.PI*2); ctx.fill();
-  vignette(ctx, W, H);
-}
-
-// Plan 4 — Évacuation
-function drawS4(ctx, t, W, H) {
-  ctx.fillStyle = '#0a0f18'; ctx.fillRect(0,0,W,H);
-  // Mer
-  const seaY = H*0.7;
-  ctx.fillStyle = '#1a2a3a'; ctx.fillRect(0, seaY, W, H-seaY);
-  for (let i=0; i<15; i++) {
-    ctx.strokeStyle=`rgba(120,180,230,${0.1+Math.sin(t*3+i)*0.05})`;
-    ctx.lineWidth=3; ctx.beginPath();
-    const y = seaY + i*H*0.02;
-    ctx.moveTo(0, y);
-    for (let x=0; x<=W; x+=30) ctx.lineTo(x, y + Math.sin(x*0.02 + t*4 + i)*8);
-    ctx.stroke();
-  }
-  // Navire
-  ctx.fillStyle='#2a1a10';
-  ctx.fillRect(W*0.15, seaY-H*0.18, W*0.5, H*0.18);
-  ctx.fillStyle='#1a0a05';
-  ctx.fillRect(W*0.35, seaY-H*0.3, W*0.06, H*0.12);
-  // Canot descendant
-  const boatY = seaY - H*0.05 + t*H*0.012;
-  ctx.fillStyle='#4a3a20';
-  ctx.beginPath();
-  ctx.moveTo(W*0.72, boatY);
-  ctx.lineTo(W*0.95, boatY);
-  ctx.lineTo(W*0.9, boatY+H*0.04);
-  ctx.lineTo(W*0.77, boatY+H*0.04);
-  ctx.closePath(); ctx.fill();
-  // Cordage
-  ctx.strokeStyle='#d4b480'; ctx.lineWidth=3;
-  ctx.beginPath();
-  ctx.moveTo(W*0.5, seaY-H*0.15);
-  ctx.quadraticCurveTo(W*0.7, seaY-H*0.05, W*0.83, boatY);
-  ctx.stroke();
-  vignette(ctx, W, H);
-}
-
-// Plan 5 — Cordage qui cède
-function drawS5(ctx, t, W, H) {
-  ctx.fillStyle='#0a0a0a'; ctx.fillRect(0,0,W,H);
-  const progress = Math.min(t/4, 1);
-  const breakX = W*0.4 + progress*W*0.1;
-  const tension = Math.sin(t*20)*4*(1-progress);
-  // Corde gauche
-  ctx.strokeStyle='#d4b480'; ctx.lineWidth=14;
-  ctx.beginPath();
-  ctx.moveTo(0, H*0.5);
-  ctx.quadraticCurveTo(W*0.2, H*0.5 + tension, breakX-20, H*0.5);
-  ctx.stroke();
-  // Corde droite
-  if (progress < 0.9) {
-    ctx.beginPath();
-    ctx.moveTo(breakX+20, H*0.5);
-    ctx.quadraticCurveTo(W*0.8, H*0.5 + tension, W, H*0.5);
-    ctx.stroke();
-  } else {
-    // Rupture — la corde droite tombe
-    const fall = (progress-0.9)*10;
-    ctx.beginPath();
-    ctx.moveTo(breakX+20, H*0.5 + fall*H);
-    ctx.quadraticCurveTo(W*0.8, H*0.5+fall*H, W, H*0.5+fall*H*1.5);
-    ctx.stroke();
-  }
-  // Frayures
-  if (progress > 0.6) {
-    ctx.strokeStyle='#f0d090'; ctx.lineWidth=2;
-    for (let i=0; i<8; i++) {
-      const a = Math.random()*Math.PI*2;
-      const d = 10 + Math.random()*40*(progress-0.6);
-      ctx.beginPath();
-      ctx.moveTo(breakX, H*0.5);
-      ctx.lineTo(breakX+Math.cos(a)*d, H*0.5+Math.sin(a)*d);
-      ctx.stroke();
-    }
-  }
-  // Flash blanc à la rupture
-  if (progress > 0.85 && progress < 0.95) {
-    ctx.fillStyle=`rgba(255,255,255,${1-(progress-0.85)*10})`;
-    ctx.fillRect(0,0,W,H);
-  }
-  vignette(ctx, W, H);
-}
-
-// Plan 6 — Dérive dans la brume (vue du dessus)
-function drawS6(ctx, t, W, H) {
-  ctx.fillStyle='#1a2530'; ctx.fillRect(0,0,W,H);
-  // Brume
-  for (let i=0; i<40; i++) {
-    const x = (i*97 + t*20) % W;
-    const y = (i*61 + t*15) % H;
-    const r = 60 + Math.sin(i + t)*30;
-    const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-    g.addColorStop(0, 'rgba(220,225,235,0.15)');
-    g.addColorStop(1, 'rgba(220,225,235,0)');
-    ctx.fillStyle = g;
-    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.fill();
-  }
-  // Navire (grand)
-  ctx.fillStyle = '#3a2a1a';
-  ctx.beginPath();
-  ctx.ellipse(W*0.3, H*0.4, W*0.08, H*0.16, 0, 0, Math.PI*2); ctx.fill();
-  // Canot (petit, s'éloigne)
-  const bx = W*0.3 + t*W*0.08, by = H*0.4 + t*H*0.1;
-  ctx.fillStyle = '#7a5a30';
-  ctx.beginPath(); ctx.ellipse(bx, by, W*0.025, H*0.04, 0, 0, Math.PI*2); ctx.fill();
-  // Sillage
-  ctx.strokeStyle='rgba(200,200,220,0.3)'; ctx.lineWidth=2;
-  ctx.beginPath(); ctx.moveTo(W*0.3, H*0.4); ctx.lineTo(bx, by); ctx.stroke();
-  vignette(ctx, W, H);
-}
-
-// Plan 7 — Test 2006, onde de choc
-function drawS7(ctx, t, W, H) {
-  ctx.fillStyle='#0a0a0a'; ctx.fillRect(0,0,W,H);
-  const progress = Math.min(t/5, 1);
-  // Anneaux concentriques
-  for (let i=0; i<4; i++) {
-    const r = (progress * W * 0.8) - i*60;
-    if (r > 0 && r < W*0.9) {
-      ctx.strokeStyle=`rgba(180,220,255,${(1-progress)*0.6})`;
-      ctx.lineWidth = 8 - i*1.5;
-      ctx.beginPath(); ctx.arc(W/2, H/2, r, 0, Math.PI*2); ctx.stroke();
-    }
-  }
-  // Cœur central
-  const coreR = W*0.15 * (1 - progress*0.3);
-  const g = ctx.createRadialGradient(W/2, H/2, 0, W/2, H/2, coreR);
-  g.addColorStop(0, `rgba(255,255,255,${1-progress*0.5})`);
-  g.addColorStop(1, 'rgba(120,180,255,0)');
-  ctx.fillStyle = g;
-  ctx.beginPath(); ctx.arc(W/2, H/2, coreR, 0, Math.PI*2); ctx.fill();
-  // Étiquette "no fire"
-  ctx.fillStyle='#fff'; ctx.font=`bold ${W*0.05}px system-ui`;
-  ctx.textAlign='center';
-  ctx.fillText('⚡ onde de choc — sans flamme', W/2, H*0.85);
-  vignette(ctx, W, H);
-}
-
-// Plan 8 — Navire fantôme + tampon
-function drawS8(ctx, t, W, H) {
-  ctx.fillStyle='#0a0a12'; ctx.fillRect(0,0,W,H);
-  // Navire figé
-  ctx.fillStyle = '#2a2a35';
-  ctx.beginPath();
-  ctx.moveTo(W*0.2, H*0.55);
-  ctx.lineTo(W*0.8, H*0.55);
-  ctx.lineTo(W*0.7, H*0.72);
-  ctx.lineTo(W*0.3, H*0.72);
-  ctx.closePath(); ctx.fill();
-  ctx.fillRect(W*0.45, H*0.35, W*0.03, H*0.2);
-  ctx.fillRect(W*0.55, H*0.42, W*0.03, H*0.13);
-  // Brume basse
-  for (let i=0; i<15; i++) {
-    const x = i*80, y = H*0.72 + Math.sin(i+t)*10;
-    const g = ctx.createRadialGradient(x, y, 0, x, y, 100);
-    g.addColorStop(0,'rgba(150,150,180,0.2)');
-    g.addColorStop(1,'rgba(150,150,180,0)');
-    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,100,0,Math.PI*2); ctx.fill();
-  }
-  // Tampon rouge (apparaît à t=1.5s)
-  if (t > 1.5) {
-    const st = Math.min((t-1.5)*4, 1);
-    const scale = 1 + (1-st)*0.5;
-    const rotate = -0.15;
-    ctx.save();
-    ctx.translate(W/2, H*0.42);
-    ctx.rotate(rotate);
-    ctx.scale(scale, scale);
-    ctx.globalAlpha = st;
-    ctx.strokeStyle = '#ff0033'; ctx.lineWidth = W*0.015;
-    ctx.strokeRect(-W*0.35, -H*0.06, W*0.7, H*0.12);
-    ctx.fillStyle = '#ff0033';
-    ctx.font = `bold ${W*0.08}px 'Arial Black'`;
-    ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText('HYPOTHÈSE', 0, -H*0.018);
-    ctx.font = `bold ${W*0.05}px 'Arial Black'`;
-    ctx.fillText('PAS UNE PREUVE', 0, H*0.035);
-    ctx.restore();
-  }
-  vignette(ctx, W, H);
-}
-
-// Plan 9 — CTA, point d'interrogation
-function drawS9(ctx, t, W, H) {
-  ctx.fillStyle='#0a0a12'; ctx.fillRect(0,0,W,H);
-  const bounce = Math.abs(Math.sin(t*3)) * H*0.03;
-  ctx.save();
-  ctx.translate(W/2, H*0.4 - bounce);
-  ctx.fillStyle = '#ff006e';
-  ctx.font = `bold ${W*0.5}px 'Arial Black'`;
-  ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.shadowColor='#ff006e'; ctx.shadowBlur=40;
-  ctx.fillText('?', 0, 0);
-  ctx.restore();
-  // Texte CTA
-  ctx.fillStyle='#fff'; ctx.font=`bold ${W*0.06}px 'Arial Black'`;
-  ctx.textAlign='center';
-  ctx.fillText('↓ Commentaire ↓', W/2, H*0.78);
-  vignette(ctx, W, H);
-}
-
-// ============ OVERLAY TEXTE ============
-function drawText(ctx, text, W, H) {
-  if (!text) return;
-  ctx.save();
-  const fs = W*0.052;
-  ctx.font = `bold ${fs}px 'Arial Black', system-ui`;
-  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  // Wrap
-  const maxW = W*0.85;
-  const words = text.split(' ');
-  const lines = [];
-  let line = '';
-  for (const w of words) {
-    const test = line ? line + ' ' + w : w;
-    if (ctx.measureText(test).width > maxW && line) { lines.push(line); line = w; }
-    else line = test;
-  }
-  if (line) lines.push(line);
-  const lineH = fs * 1.3;
-  const totalH = lines.length * lineH;
-  const y0 = H*0.87 - totalH/2;
-  // Pill
-  const maxLineW = Math.max(...lines.map(l => ctx.measureText(l).width));
-  const pad = fs*0.6;
-  ctx.fillStyle = 'rgba(0,0,0,0.8)';
-  ctx.beginPath();
-  const rx = W/2 - maxLineW/2 - pad, ry = y0 - pad;
-  const rw = maxLineW + pad*2, rh = totalH + pad*2;
-  const r = fs*0.35;
-  ctx.moveTo(rx+r, ry);
-  ctx.lineTo(rx+rw-r, ry); ctx.quadraticCurveTo(rx+rw, ry, rx+rw, ry+r);
-  ctx.lineTo(rx+rw, ry+rh-r); ctx.quadraticCurveTo(rx+rw, ry+rh, rx+rw-r, ry+rh);
-  ctx.lineTo(rx+r, ry+rh); ctx.quadraticCurveTo(rx, ry+rh, rx, ry+rh-r);
-  ctx.lineTo(rx, ry+r); ctx.quadraticCurveTo(rx, ry, rx+r, ry);
-  ctx.fill();
-  // Texte
-  ctx.fillStyle = '#fff';
-  lines.forEach((l, i) => ctx.fillText(l, W/2, y0 + i*lineH + lineH/2));
-  ctx.restore();
-}
-
-// ============ TIMELINE ============
-let timelineStart = 0;
-let timelineRunning = false;
-
-function findScene(elapsed) {
-  for (const s of SCENES) if (elapsed >= s.start && elapsed < s.end) return s;
-  return null;
-}
-
-function renderFrame() {
-  const elapsed = (performance.now() - timelineStart) / 1000;
-  const scene = findScene(elapsed);
-  ctx.clearRect(0,0,W,H);
-  if (scene) {
-    const localT = elapsed - scene.start;
-    scene.draw(ctx, localT, W, H);
-    // Fondu d'entrée/sortie du texte
-    const ft = Math.min(localT/0.3, 1);
-    const fo = Math.min((scene.end - scene.start - localT)/0.3, 1);
-    ctx.globalAlpha = Math.min(ft, fo);
-    drawText(ctx, scene.text, W, H);
-    ctx.globalAlpha = 1;
-  }
-  if (elapsed < TOTAL) requestAnimationFrame(renderFrame);
-  else timelineRunning = false;
-}
-
-function scheduleAudio() {
-  const t0 = audioCtx.currentTime + 0.05;
-  SCENES.forEach(s => {
-    const ts = t0 + s.start;
-    s.sfx.forEach(name => { if (SFX[name]) SFX[name](ts); });
-    // Voix off
-    if ('speechSynthesis' in window) {
-      const u = new SpeechSynthesisUtterance(s.voice);
-      u.lang = 'fr-FR'; u.rate = 1.05; u.pitch = 0.95;
-      setTimeout(() => speechSynthesis.speak(u), s.start * 1000);
-    }
-  });
-}
-
-async function playPreview() {
-  initAudio(); await audioCtx.resume();
-  timelineStart = performance.now();
-  timelineRunning = true;
-  status.textContent = '▶️ Lecture en cours (voix + SFX)...';
-  scheduleAudio();
-  renderFrame();
-  setTimeout(() => { status.textContent = '✅ Aperçu terminé.'; }, TOTAL * 1000);
-}
-
-async function recordVideo() {
-  initAudio(); await audioCtx.resume();
-  const stream = canvas.captureStream(30);
-  const audioStream = recDest.stream;
-  const combined = new MediaStream([
-    ...stream.getVideoTracks(),
-    ...audioStream.getAudioTracks()
-  ]);
-  const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
-    ? 'video/webm;codecs=vp9' : 'video/webm';
-  const recorder = new MediaRecorder(combined, { mimeType: mime, videoBitsPerSecond: 8_000_000 });
-  const chunks = [];
-  recorder.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
-  recorder.onstop = () => {
-    const blob = new Blob(chunks, { type:'video/webm' });
-    const url = URL.createObjectURL(blob);
-    const dl = document.getElementById('dl');
-    dl.href = url; dl.style.display = 'inline-block';
-    status.textContent = `✅ Vidéo prête (${(blob.size/1024/1024).toFixed(1)} Mo). Clique sur le bouton de téléchargement.`;
-    document.getElementById('rec').disabled = false;
+    setTimeout(()=>e.target.textContent="Copier le prompt",1800);
   };
-  recorder.start();
-  timelineStart = performance.now();
-  timelineRunning = true;
-  scheduleAudio();
-  renderFrame();
-  status.textContent = '🔴 Enregistrement en cours...';
-  document.getElementById('rec').disabled = true;
-  setTimeout(() => { if (recorder.state !== 'inactive') recorder.stop(); }, TOTAL * 1000);
+});
+
+function setActive(id){
+  [...timeline.children].forEach((b,i)=>b.classList.toggle("active",i===id-1));
 }
 
-document.getElementById('play').onclick = playPreview;
-document.getElementById('rec').onclick = recordVideo;
+document.querySelectorAll("[data-filter]").forEach(btn=>{
+ btn.onclick=()=>{
+  document.querySelectorAll("[data-filter]").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+  const filter=btn.dataset.filter;
+  document.querySelectorAll(".scene").forEach((s,i)=>{
+    s.hidden=filter==="audio"?false:filter==="visual"?false:false;
+  });
+  if(filter==="visual") document.querySelectorAll(".detail").forEach(d=>d.style.opacity="1");
+  if(filter==="audio") document.querySelectorAll(".detail").forEach(d=>d.style.opacity=d.querySelector("h3").textContent==="Sound design"?"1":".45");
+  if(filter==="all") document.querySelectorAll(".detail").forEach(d=>d.style.opacity="1");
+ };
+});
 
-// Première image (aperçu statique)
-drawS1(ctx, 0, W, H);
-drawText(ctx, "1 701 barils d'alcool... et un mystère", W, H);
+const checks=[
+"Les six images maîtresses sont validées.",
+"La porte et la silhouette sont cohérentes.",
+"La voix off est enregistrée et synchronisée.",
+"Le mot « غالط » coïncide avec la rupture sonore.",
+"Les sous-titres arabes ont été relus.",
+"Les mouvements et transitions sont finalisés.",
+"Le mixage et l'étalonnage sont cohérents.",
+"L'export a été vérifié sur téléphone."
+];
+const checkEl=document.getElementById("checklist");
+checks.forEach((label,i)=>{
+ const row=document.createElement("label");row.className="check";
+ row.innerHTML=`<input type="checkbox" data-check="${i}"><span>${label}</span>`;
+ checkEl.appendChild(row);
+});
+checkEl.addEventListener("change",()=>{
+ const inputs=[...checkEl.querySelectorAll("input")];
+ const n=inputs.filter(x=>x.checked).length;
+ document.getElementById("progressbar").style.width=(n/inputs.length*100)+"%";
+ document.getElementById("progresslabel").textContent=`${n} / ${inputs.length} étapes terminées`;
+});
 </script>
 </body>
 </html>
